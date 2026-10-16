@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+screenshots/
+# 비공개 근거·금지어 목록은 저장소 밖(../portfolio-private)에 둔다. 혹시 안으로 들어와도 커밋되지 않게 막는다.
+private/
+denylist*.txt
+.env*
+
+# 기획·분석 문서는 로컬에만 둔다 (분석 메모 포함)
+docs/
