@@ -1,6 +1,6 @@
 import { findUnverified, stripUnverified } from '../evidence';
 import type { Project } from '../types';
-import { project as firstProject } from './prepaid-enterprise-plan';
+import { project as firstProject } from './contract-billing';
 
 const projects: Project[] = [firstProject];
 

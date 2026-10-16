@@ -13,7 +13,7 @@ import { chromium } from 'playwright-core';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'out');
 const shotDir = path.join(root, 'screenshots');
-const PAGE = '/projects/prepaid-enterprise-plan';
+const PAGE = '/projects/contract-billing';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 
 if (!existsSync(outDir)) {
@@ -156,6 +156,31 @@ for (const width of [1280, 375]) {
   // 데스크톱은 같은 노드(운영 서버)가 두 번 나와 번호 배지가 5개, 모바일은 다이어그램이 없어 단계 수로 센다
   if (steps === 6 && numbered === (width >= 768 ? 5 : 6)) ok(`${width}px "충전" 선택 → 단계 ${steps}개${width >= 768 ? `, 다이어그램 번호 ${numbered}개` : ''}`);
   else fail(`${width}px "충전" 선택 → 단계 ${steps}개, 번호 ${numbered}개 (단계 6, 번호 5여야 함)`);
+  await page.close();
+}
+
+// 6) 다이어그램 노드의 '주요 개발 내용에서 자세히 보기' 링크가 대상 개발 단위로 이동하는지
+{
+  const page = await openPage(1280, 800);
+  const names = await page.locator('[data-node]').evaluateAll((els) => els.map((e) => e.getAttribute('data-node-name')));
+  for (const name of names) {
+    await page.locator('[data-flow="all"]').click();
+    await page.locator(`[data-node-name="${name}"]`).click();
+    const link = page.locator('[data-node-panel] a[href^="#dev-"]');
+    if ((await link.count()) === 0) continue; // 사람 노드 등 링크 없는 노드
+    const href = await link.getAttribute('href');
+    await link.click();
+    await page.waitForTimeout(300);
+    const r = await page.evaluate((h) => {
+      const el = document.querySelector(h);
+      if (!el) return null;
+      const title = el.querySelector('h3, h4')?.textContent?.trim() ?? '';
+      return { top: Math.round(el.getBoundingClientRect().top), title };
+    }, href);
+    if (r && r.top >= 55 && r.top < 400) ok(`노드 "${name}" → ${href} (${r.title}) top ${r.top}`);
+    else fail(`노드 "${name}" → ${href} 이동 실패 ${JSON.stringify(r)}`);
+    await page.evaluate(() => document.getElementById('architecture').scrollIntoView());
+  }
   await page.close();
 }
 

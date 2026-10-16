@@ -217,7 +217,9 @@ export default async function ProjectPage({ params }: Params) {
                     {group.title}
                   </h3>
                   <p className="mt-1 text-[13px] text-meta">{group.system}</p>
-                  <p className="mt-4 max-w-[680px] text-[16px]/[28px] text-ink">{group.summary}</p>
+                  <p className="mt-4 max-w-[680px] text-[16px]/[28px] text-ink">
+                    {group.emphasis ? <Emphasized text={group.summary} phrase={group.emphasis} /> : group.summary}
+                  </p>
 
                   {group.apis && (
                     <ul aria-label="API 4종" className="mt-6 divide-y divide-line-soft rounded-md bg-soft px-4 text-[15px]/[25px]">
@@ -241,7 +243,9 @@ export default async function ProjectPage({ params }: Params) {
                       >
                         <Draft evidence={unit.evidence}>
                           <h4 className="text-[16px]/[26px] font-semibold text-ink">{unit.title}</h4>
-                          <p className="mt-1.5 text-[15px]/[26px] text-sub">{unit.body}</p>
+                          <p className="mt-1.5 text-[15px]/[26px] text-sub">
+                            {unit.emphasis ? <Emphasized text={unit.body} phrase={unit.emphasis} /> : unit.body}
+                          </p>
                           {unit.more && <More more={unit.more} />}
                         </Draft>
                       </div>

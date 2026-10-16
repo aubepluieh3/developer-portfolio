@@ -1,10 +1,10 @@
 import type { Project } from '../types';
 
 // 공개 원칙: 회사명·내부 요건 번호·운영 수치·실제 테이블/API 명칭·소스코드·운영 시스템의 잠재 약점은 쓰지 않는다.
-// 근거 상세(커밋·경로)는 저장소 밖 portfolio-private/evidence-matrix-prepaid-enterprise.md 에 있다.
+// 근거 상세(커밋·경로)는 저장소 밖 portfolio-private/evidence-matrix-contract-billing.md 에 있다.
 
 export const project: Project = {
-  slug: 'prepaid-enterprise-plan',
+  slug: 'contract-billing',
   title: '선불형 기업 요금제 개발',
   meta: 'B2B 전자계약 SaaS · 2024.05 – 2024.08 개발 · 2024.10 운영 반영',
   summary:
@@ -178,7 +178,7 @@ export const project: Project = {
         mine: [
           { ownership: 'extended', text: '기존 수집 파이프라인에 잔여량 데이터 유형을 추가해 운영 DB에 반영하도록 했습니다.' },
         ],
-        ref: 'usage',
+        ref: 'sync',
         evidence: 'git',
       },
       {
@@ -227,7 +227,7 @@ export const project: Project = {
         mine: [
           { ownership: 'new', text: '고객사별 단가 엔터티(JPA)를 추가했습니다. 잔여량과 제한 설정은 기존 데이터를 신규 요금제에서 사용합니다.' },
         ],
-        ref: 'billing',
+        ref: 'unit-price',
         evidence: 'git',
       },
       {
@@ -242,7 +242,7 @@ export const project: Project = {
         role: '고객 서비스에서 운영관리시스템으로 데이터를 비동기로 보내는 기존 큐입니다.',
         mine: [],
         note: '큐는 기존 구조를 그대로 사용했습니다. 잔여량 적재는 과금 로직에서 추가했습니다.',
-        ref: 'usage',
+        ref: 'sync',
         evidence: 'git',
       },
       {
@@ -258,7 +258,7 @@ export const project: Project = {
         mine: [
           { ownership: 'extended', text: '판정 로직은 기존 코드이며, 운영관리시스템에서 전달한 제한 설정이 신규 요금제에도 적용되도록 연동했습니다.' },
         ],
-        ref: 'billing',
+        ref: 'limit',
         evidence: 'git',
       },
       {
@@ -275,7 +275,7 @@ export const project: Project = {
           { ownership: 'extended', text: '기존 요금·결제 내역 화면에 잔여량 표시, 결제 수단·결제일 항목과 페이징 데이터를 연동했습니다.' },
         ],
         note: '화면 디자인과 마크업은 디자인·퍼블리싱 담당자의 작업입니다.',
-        ref: 'usage',
+        ref: 'customer',
         evidence: 'git',
       },
       {
@@ -428,12 +428,13 @@ export const project: Project = {
   },
 
   // 04 주요 개발 내용. 공개 화면에는 기여 구분 라벨을 쓰지 않고 문장으로 범위를 드러낸다.
-  // ownership 은 내부 검증용으로만 유지한다 (근거: portfolio-private/evidence-matrix-prepaid-enterprise.md).
+  // ownership 은 내부 검증용으로만 유지한다 (근거: portfolio-private/evidence-matrix-contract-billing.md).
   contributions: [
     {
       id: 'api',
       title: '시스템 간 API 연동',
       system: '운영관리시스템 · 고객 서비스',
+      emphasis: '호출부와 고객 서비스의 수신부를 모두 구현',
       summary:
         '운영관리시스템과 고객 서비스 간 데이터 연동을 위해 REST API 4종을 개발했습니다. 운영관리시스템의 API 호출부와 고객 서비스의 수신부를 모두 구현하고, 기존 요금제 처리 로직을 기업 선불형 요금제에 맞게 확장했습니다.',
       apis: [
@@ -451,12 +452,14 @@ export const project: Project = {
           evidence: 'git',
         },
         {
+          anchor: 'unit-price',
           title: '고객사별 단가 적용',
           body: '충전이 끝나면 운영관리시스템이 계약 옵션 단가를 고객 서비스로 전달합니다. 사용량을 차감할 때는 계약 옵션 단가가 있으면 그 단가를, 없으면 기본 요금제 단가를 적용하도록 구현했습니다.',
           ownership: ['new'],
           evidence: 'git',
         },
         {
+          anchor: 'limit',
           title: '문서 생성 제한 연동',
           body: '운영관리시스템에서 설정한 문서 생성 제한 정보를 고객 서비스에 반영하고, 기존 생성 제한 로직과 연동했습니다. 제한 조건에 해당하면 기업 고객에게 맞는 안내가 나오도록 기존 안내 팝업을 확장했습니다.',
           ownership: ['extended'],
@@ -521,17 +524,20 @@ export const project: Project = {
         },
         {
           title: '사용현황 집계 SQL 구현',
+          emphasis: '집계 SQL을 직접 구현',
           body: '고객사별 계약 데이터를 조회하고 사용현황을 구성하기 위해 CTE와 ROW_NUMBER()를 활용한 집계 SQL을 직접 구현했습니다.',
           ownership: ['new'],
           evidence: 'git',
         },
         {
+          anchor: 'sync',
           title: '기존 비동기 동기화 구조 확장',
           body: '고객 서비스의 잔여량 정보를 운영관리시스템에 반영할 수 있도록 기존 비동기 동기화 구조에 잔여량 데이터 처리를 추가했습니다. 충전 시점과 일 배치에서 잔여량을 전달합니다.',
           ownership: ['extended'],
           evidence: 'git',
         },
         {
+          anchor: 'customer',
           title: '고객 화면 데이터 연동',
           body: '고객 화면의 잔여 문서·크레딧 표시와 결제 내역의 결제 수단·결제일 항목에 필요한 데이터를 연동하고, 결제 내역 페이징을 구현했습니다.',
           ownership: ['extended'],

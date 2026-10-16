@@ -8,7 +8,7 @@ export default function Home() {
       <h1 className="mt-3 text-[28px]/[36px] font-bold">프로젝트</h1>
       <ul className="mt-8 border-t border-line">
         <li className="border-b border-line py-5">
-          <Link href="/projects/prepaid-enterprise-plan" className="text-lg font-semibold text-link hover:underline">
+          <Link href="/projects/contract-billing" className="text-lg font-semibold text-link hover:underline">
             선불형 기업 요금제 개발
           </Link>
         </li>

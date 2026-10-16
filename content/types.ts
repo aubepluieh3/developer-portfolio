@@ -38,6 +38,8 @@ export interface DevUnit extends Sourced {
   ownership: Ownership[];
   /** 다른 섹션에서 링크할 앵커 (dev-<anchor>) */
   anchor?: string;
+  /** body 안에서 밑줄로 강조할 구절 (페이지 전체 3~4개 이내) */
+  emphasis?: string;
   more?: More;
 }
 
@@ -51,6 +53,8 @@ export interface ContributionGroup {
   title: string;
   system: string;
   summary: string;
+  /** summary 안에서 밑줄로 강조할 구절 */
+  emphasis?: string;
   units: DevUnit[];
   apis?: ApiItem[];
   /** 기존 구조를 활용한 부분 (보조 설명) */
