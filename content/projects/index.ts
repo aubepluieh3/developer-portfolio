@@ -1,8 +1,9 @@
 import { findUnverified, stripUnverified } from '../evidence';
 import type { Project } from '../types';
 import { project as firstProject } from './contract-billing';
+import { project as secondProject } from './pg-payment-integration';
 
-const projects: Project[] = [firstProject];
+const projects: Project[] = [firstProject, secondProject];
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -35,6 +36,11 @@ export function getProject(slug: string): Project | undefined {
     steps: f.steps.filter((s) => ids.has(s.node)),
   }));
   return clean;
+}
+
+/** 메인 목록용: 등록 순서대로 */
+export function getProjects(): Project[] {
+  return projects.map((p) => getProject(p.slug)).filter((p): p is Project => p !== undefined);
 }
 
 export function getProjectSlugs(): string[] {

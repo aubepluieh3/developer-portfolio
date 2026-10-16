@@ -40,33 +40,18 @@ const edgeKey = (from: string, to: string) => `${from}>${to}`;
 export function ArchitectureExplorer({ architecture }: { architecture: Architecture }) {
   const { nodes, edges, lanes, flows } = architecture;
   const [flowId, setFlowId] = useState<string>('all');
-  const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const flow = flows.find((f) => f.id === flowId);
 
-  // 강조 대상: 마우스·포커스가 있으면 그 노드의 연결, 없으면 선택한 시나리오의 경로
+  // 경로 강조는 시나리오 버튼으로만 바뀐다. 노드 hover·클릭은 다이어그램 전체 강조를 바꾸지 않는다.
   const emphasis = useMemo(() => {
-    if (hovered) {
-      const nodeSet = new Set([hovered]);
-      const edgeSet = new Set<string>();
-      for (const e of edges) {
-        if (e.from === hovered || e.to === hovered) {
-          nodeSet.add(e.from);
-          nodeSet.add(e.to);
-          edgeSet.add(edgeKey(e.from, e.to));
-        }
-      }
-      return { nodeSet, edgeSet };
-    }
-    if (flow) {
-      const nodeSet = new Set(flow.path.flat());
-      flow.steps.forEach((s) => nodeSet.add(s.node));
-      return { nodeSet, edgeSet: new Set(flow.path.map(([a, b]) => edgeKey(a, b))) };
-    }
-    return null;
-  }, [hovered, flow, edges]);
+    if (!flow) return null;
+    const nodeSet = new Set(flow.path.flat());
+    flow.steps.forEach((st) => nodeSet.add(st.node));
+    return { nodeSet, edgeSet: new Set(flow.path.map(([x, y]) => edgeKey(x, y))) };
+  }, [flow]);
 
   const stepNumber = useMemo(() => {
     const map = new Map<string, number>();
@@ -107,9 +92,8 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
       </div>
 
       <div className="mt-6 hidden md:block">
-        <Legend />
         <div
-          className="relative mt-4 w-full max-w-[960px] select-none"
+          className="relative w-full max-w-[960px] select-none"
           style={{ aspectRatio: `${VW} / ${VH}`, containerType: 'inline-size' }}
         >
           <svg viewBox={`0 0 ${VW} ${VH}`} className="absolute inset-0 h-full w-full" aria-hidden>
@@ -118,33 +102,56 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
                 ['arrow', 'var(--color-edge)'],
                 ['arrow-strong', 'var(--color-ink)'],
               ].map(([id, color]) => (
-                <marker key={id} id={id} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <marker key={id} id={id} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                   <path d="M0,1 L9,5 L0,9 z" fill={color} />
                 </marker>
               ))}
             </defs>
-            <rect x="2" y="2" width="472" height="596" rx="10" fill="none" stroke="var(--color-line)" />
-            <rect x="526" y="2" width="472" height="596" rx="10" fill="none" stroke="var(--color-line)" />
+            {lanes.map((lane) => (
+              <rect key={lane.id} x={lane.x} y="2" width={lane.width} height="596" rx="10" fill="none" stroke="var(--color-line)" />
+            ))}
+            {/* 경로 강조 띠 (선택한 시나리오만) — 기여 구분 색과 겹치지 않도록 옅은 하늘색 형광펜으로 */}
+            {edges.map((e) => {
+              const a = byId.get(e.from);
+              const b = byId.get(e.to);
+              if (!a || !b || !isEdgeActive(e)) return null;
+              const s1 = exitPoint(a, b);
+              const t1 = exitPoint(b, a);
+              return (
+                <line
+                  key={`hl-${edgeKey(e.from, e.to)}`}
+                  x1={s1.x}
+                  y1={s1.y}
+                  x2={t1.x}
+                  y2={t1.y}
+                  stroke="var(--color-sky)"
+                  strokeWidth={11}
+                  strokeLinecap="round"
+                  opacity={0.55}
+                />
+              );
+            })}
+            {/* 연결선 본체: 기여 구분은 노드 테두리로만 표시한다. primary 는 데이터에 있을 때만 굵게 그린다 */}
             {edges.map((e) => {
               const a = byId.get(e.from);
               const b = byId.get(e.to);
               if (!a || !b) return null;
-              const s = exitPoint(a, b);
-              const t = exitPoint(b, a);
-              const active = isEdgeActive(e);
-              const strong = e.primary || active;
-              const dim = emphasis !== null && !active;
+              const s1 = exitPoint(a, b);
+              const t1 = exitPoint(b, a);
+              const off = emphasis !== null && !isEdgeActive(e);
+              const marker = `url(#${e.primary ? 'arrow-strong' : 'arrow'})`;
               return (
                 <line
                   key={edgeKey(e.from, e.to)}
-                  x1={s.x}
-                  y1={s.y}
-                  x2={t.x}
-                  y2={t.y}
-                  stroke={strong ? 'var(--color-ink)' : 'var(--color-edge)'}
-                  strokeWidth={e.primary ? 3 : active ? 2.4 : 1.5}
-                  markerEnd={`url(#${strong ? 'arrow-strong' : 'arrow'})`}
-                  opacity={dim ? 0.2 : 1}
+                  x1={s1.x}
+                  y1={s1.y}
+                  x2={t1.x}
+                  y2={t1.y}
+                  stroke={e.primary ? 'var(--color-ink)' : 'var(--color-edge)'}
+                  strokeWidth={e.primary ? 3 : 1.5}
+                  markerEnd={marker}
+                  markerStart={e.bidirectional ? marker : undefined}
+                  opacity={off ? 0.45 : 1}
                 />
               );
             })}
@@ -154,7 +161,7 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
             <span
               key={lane.id}
               className="absolute top-[1.2%] font-medium text-sub"
-              style={{ left: lane.id === 'admin' ? '1.4%' : '54%', fontSize: 'clamp(11px, 1.3cqw, 13px)' }}
+              style={{ left: `${(lane.x + 12) / 10}%`, fontSize: 'clamp(11px, 1.3cqw, 13px)' }}
             >
               {lane.label}
             </span>
@@ -171,7 +178,7 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
               <span
                 key={`label-${edgeKey(e.from, e.to)}`}
                 className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 bg-white px-1 whitespace-nowrap ${
-                  dim ? 'opacity-30' : ''
+                  dim ? 'opacity-50' : ''
                 } ${e.primary ? 'font-semibold text-ink' : 'text-sub'}`}
                 style={{ left: `${x / 10}%`, top: `${y / 6}%`, fontSize: 'clamp(10px, 1.25cqw, 13px)' }}
               >
@@ -182,8 +189,8 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
 
           {nodes.map((node) => {
             const isSelected = node.id === selected;
-            const dim = emphasis !== null && !emphasis.nodeSet.has(node.id);
-            const num = !hovered ? stepNumber.get(node.id) : undefined;
+            const inPath = emphasis?.nodeSet.has(node.id) ?? false;
+            const num = stepNumber.get(node.id);
             return (
               <button
                 key={node.id}
@@ -192,14 +199,10 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
                 data-node-name={node.name}
                 aria-pressed={isSelected}
                 aria-label={node.summary ? `${node.name}: ${node.summary}` : node.name}
-                onMouseEnter={() => setHovered(node.id)}
-                onMouseLeave={() => setHovered(null)}
-                onFocus={() => setHovered(node.id)}
-                onBlur={() => setHovered(null)}
                 onClick={() => setSelected(isSelected ? null : node.id)}
-                className={`absolute flex cursor-pointer flex-col items-center justify-center px-1 text-center leading-tight transition-opacity ${nodeBorder(
+                className={`absolute flex cursor-pointer flex-col items-center justify-center px-1 text-center leading-tight ${nodeBorder(
                   node,
-                )} ${isSelected ? 'bg-tint' : 'bg-white hover:bg-tint'} ${dim ? 'opacity-35' : ''}`}
+                )} ${isSelected ? 'bg-[#e0f2fe]' : inPath ? 'bg-tint' : 'bg-white hover:bg-soft'}`}
                 style={{
                   left: `${(node.x - NW / 2) / 10}%`,
                   top: `${(node.y - NH / 2) / 6}%`,
@@ -226,6 +229,7 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
             );
           })}
         </div>
+        <Legend />
       </div>
 
       <div data-node-panel aria-live="polite" className="mt-6 max-w-[760px] border-t border-line pt-6">
@@ -346,22 +350,18 @@ function NodeDetail({ node, onClose }: { node: ArchNode; onClose: () => void }) 
 function Legend() {
   const item = 'inline-flex items-center gap-2';
   return (
-    <ul aria-label="범례" className="flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-sub">
+    <ul aria-label="범례" className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[12px] text-meta">
       <li className={item}>
-        <span aria-hidden className="inline-block h-4 w-7 rounded-sm border-2 border-ink" />
+        <span aria-hidden className="inline-block h-3 w-5 rounded-[3px] border-2 border-ink" />
         신규 구현
       </li>
       <li className={item}>
-        <span aria-hidden className="inline-block h-4 w-7 rounded-sm border-2 border-accent" />
+        <span aria-hidden className="inline-block h-3 w-5 rounded-[3px] border-2 border-accent" />
         기존 기능 확장
       </li>
       <li className={item}>
-        <span aria-hidden className="inline-block h-4 w-7 rounded-sm border border-dashed border-edge" />
+        <span aria-hidden className="inline-block h-3 w-5 rounded-[3px] border border-dashed border-edge" />
         기존 구조 활용
-      </li>
-      <li className={item}>
-        <span aria-hidden className="inline-block h-[3px] w-7 bg-ink" />
-        직접 구현한 시스템 간 연동
       </li>
     </ul>
   );

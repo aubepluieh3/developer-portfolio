@@ -6,6 +6,12 @@ import type { Project } from '../types';
 export const project: Project = {
   slug: 'contract-billing',
   title: '선불형 기업 요금제 개발',
+  listing: {
+    description:
+      '운영 담당자가 개발팀에 묻지 않고 기업 고객의 계약·충전·사용량을 직접 관리할 수 있도록, 운영관리시스템과 고객 서비스에 신규 선불형 요금제를 구현했습니다.',
+    stack: ['풀스택', 'Spring', 'MyBatis', 'JPA', 'SQL'],
+    year: '2024',
+  },
   meta: 'B2B 전자계약 SaaS · 2024.05 – 2024.08 개발 · 2024.10 운영 반영',
   summary:
     '기업 계약 관리와 선불 과금을 결합한 신규 요금제의 계약·충전·사용량 기능을 사내 운영관리시스템과 고객 서비스 양쪽에 구현했습니다.',
@@ -70,8 +76,8 @@ export const project: Project = {
 
   architecture: {
     lanes: [
-      { id: 'admin', label: '운영관리시스템 (사내)' },
-      { id: 'service', label: '고객 서비스 (SaaS)' },
+      { id: 'admin', label: '운영관리시스템 (사내)', x: 2, width: 472 },
+      { id: 'service', label: '고객 서비스 (SaaS)', x: 526, width: 472 },
     ],
     roles: [
       {
@@ -297,7 +303,7 @@ export const project: Project = {
       { from: 'contract-ui', to: 'admin-server' },
       { from: 'admin-server', to: 'admin-db' },
       { from: 'admin-db', to: 'usage-ui', label: '집계 SQL', labelDx: 44 },
-      { from: 'admin-server', to: 'service-api', label: 'API 4종', primary: true, labelDy: -16 },
+      { from: 'admin-server', to: 'service-api', label: 'API 4종 · 호출부·수신부 구현', labelDy: -16 },
       { from: 'service-api', to: 'billing' },
       { from: 'service-api', to: 'service-db' },
       { from: 'billing', to: 'service-db' },

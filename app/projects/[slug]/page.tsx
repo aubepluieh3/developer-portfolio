@@ -119,7 +119,7 @@ export default async function ProjectPage({ params }: Params) {
         <main className="min-w-0">
           {/* 01 */}
           <Section id="summary" num="01" title="프로젝트 요약">
-            <dl className="grid max-w-[760px] gap-x-6 gap-y-4 text-[15px]/[26px] sm:grid-cols-[6rem_minmax(0,1fr)]">
+            <dl className="grid max-w-[820px] gap-x-6 gap-y-4 text-[15px]/[26px] sm:grid-cols-[10rem_minmax(0,1fr)]">
               {overview.rows.map(([k, v]) => (
                 <div key={k} className="contents">
                   <dt className="text-meta">{k}</dt>
@@ -136,7 +136,7 @@ export default async function ProjectPage({ params }: Params) {
                   </p>
                 ))}
               </dd>
-              <dt className="text-meta">협업 범위</dt>
+              <dt className="text-meta">{overview.collaborationLabel ?? '협업 및 기존 구조 활용'}</dt>
               <dd className="-mt-3 space-y-1 text-sub sm:mt-0">
                 {overview.collaboration.map((c) => (
                   <Draft key={c.text} evidence={c.evidence}>

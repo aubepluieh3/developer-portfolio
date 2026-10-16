@@ -61,7 +61,15 @@ export interface ContributionGroup {
   note?: string;
 }
 
-export type Lane = 'admin' | 'service';
+export type Lane = string;
+
+export interface LaneDef {
+  id: Lane;
+  label: string;
+  /** viewBox 1000×600 기준 왼쪽 x와 폭 */
+  x: number;
+  width: number;
+}
 
 export interface NodeContribution {
   ownership: Ownership;
@@ -94,6 +102,8 @@ export interface ArchEdge {
   sublabel?: string;
   /** 본인이 구현한 핵심 연결 (굵은 네이비 선) */
   primary?: boolean;
+  /** 양쪽 화살표 (예: window.open · postMessage) */
+  bidirectional?: boolean;
   /** 라벨 위치 보정 (viewBox 단위) */
   labelDx?: number;
   labelDy?: number;
@@ -119,7 +129,7 @@ export interface Flow {
 }
 
 export interface Architecture {
-  lanes: { id: Lane; label: string }[];
+  lanes: LaneDef[];
   roles: { label: string; text: string }[];
   nodes: ArchNode[];
   edges: ArchEdge[];
@@ -137,9 +147,21 @@ export interface CaseStudy extends Sourced {
   more?: More;
 }
 
+/** 메인 프로젝트 목록에 보이는 요약 */
+export interface ProjectListing {
+  /** 어떤 문제를 해결했는지 한두 문장 */
+  description: string;
+  /** 핵심 기술 또는 역할 */
+  stack: string[];
+  year: string;
+  /** 서비스 미도입 등 오해를 막기 위한 상태 표시 (작게) */
+  status?: string;
+}
+
 export interface Project {
   slug: string;
   title: string;
+  listing: ProjectListing;
   meta: string;
   summary: string;
   role: string;
@@ -151,6 +173,8 @@ export interface Project {
     stacks: { system: string; items: string[] }[];
     /** 다른 담당자의 역할과 기존 구조 활용. 한두 문장 */
     collaboration: TextItem[];
+    /** 협업 항목 라벨 (기본 '협업 및 기존 구조 활용') */
+    collaborationLabel?: string;
   };
   background: {
     comparisons: (Sourced & { topic: string; before: string; after: string })[];
