@@ -110,36 +110,17 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
             {lanes.map((lane) => (
               <rect key={lane.id} x={lane.x} y="2" width={lane.width} height="596" rx="10" fill="none" stroke="var(--color-line)" />
             ))}
-            {/* 경로 강조 띠 (선택한 시나리오만) — 기여 구분 색과 겹치지 않도록 옅은 하늘색 형광펜으로 */}
-            {edges.map((e) => {
-              const a = byId.get(e.from);
-              const b = byId.get(e.to);
-              if (!a || !b || !isEdgeActive(e)) return null;
-              const s1 = exitPoint(a, b);
-              const t1 = exitPoint(b, a);
-              return (
-                <line
-                  key={`hl-${edgeKey(e.from, e.to)}`}
-                  x1={s1.x}
-                  y1={s1.y}
-                  x2={t1.x}
-                  y2={t1.y}
-                  stroke="var(--color-sky)"
-                  strokeWidth={11}
-                  strokeLinecap="round"
-                  opacity={0.55}
-                />
-              );
-            })}
-            {/* 연결선 본체: 기여 구분은 노드 테두리로만 표시한다. primary 는 데이터에 있을 때만 굵게 그린다 */}
+            {/* 연결선: 기여 구분은 노드 테두리로만 한다. 시나리오를 고르면 경로 선만 네이비로 진하게, 나머지는 옅게 */}
             {edges.map((e) => {
               const a = byId.get(e.from);
               const b = byId.get(e.to);
               if (!a || !b) return null;
               const s1 = exitPoint(a, b);
               const t1 = exitPoint(b, a);
-              const off = emphasis !== null && !isEdgeActive(e);
-              const marker = `url(#${e.primary ? 'arrow-strong' : 'arrow'})`;
+              const active = isEdgeActive(e);
+              const off = emphasis !== null && !active;
+              const strong = active || e.primary;
+              const marker = `url(#${strong ? 'arrow-strong' : 'arrow'})`;
               return (
                 <line
                   key={edgeKey(e.from, e.to)}
@@ -147,11 +128,11 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
                   y1={s1.y}
                   x2={t1.x}
                   y2={t1.y}
-                  stroke={e.primary ? 'var(--color-ink)' : 'var(--color-edge)'}
-                  strokeWidth={e.primary ? 3 : 1.5}
+                  stroke={strong ? 'var(--color-ink)' : 'var(--color-edge)'}
+                  strokeWidth={active ? 2.6 : e.primary ? 3 : 1.5}
                   markerEnd={marker}
                   markerStart={e.bidirectional ? marker : undefined}
-                  opacity={off ? 0.45 : 1}
+                  opacity={off ? 0.22 : 1}
                 />
               );
             })}

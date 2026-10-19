@@ -13,54 +13,58 @@ export interface TocItem {
  * 스크롤 위치에 따라 현재 섹션을 강조하는 목차.
  * - side: 데스크톱 좌측 sticky 목록
  * - bar: 1023px 이하 상단 가로 바 (이 행만 가로 스크롤)
- * 판정 기준: 고정 헤더 바로 아래부터 화면 위쪽 40% 구간에 걸친 첫 섹션 (docs §5.3)
+ * 판정 기준: 섹션 제목이 고정 헤더 아래 화면 위쪽 40% 선을 지난 마지막 섹션.
+ * 페이지 맨 아래에 닿으면 마지막 섹션으로 본다 (짧은 마지막 섹션은 제목이 위로 올라오지 못하므로).
+ * 클릭한 항목은 그 클릭으로 시작된 스크롤이 끝날 때까지 유지하고, 그 뒤의 스크롤부터 다시 계산한다.
  */
 export function Toc({ items, variant }: { items: TocItem[]; variant: 'side' | 'bar' }) {
   const [active, setActive] = useState(items[0]?.id);
   const listRef = useRef<HTMLOListElement>(null);
-  // 클릭 직후에는 클릭한 항목을 유지한다. 페이지 끝 근처 짧은 섹션도 클릭한 대로 표시하기 위해서다.
-  const clickLock = useRef<{ id: string; until: number } | null>(null);
+  const clickLock = useRef<{ settled: boolean; timer: number } | null>(null);
 
   useEffect(() => {
-    const sections = items
-      .map((item) => document.getElementById(item.id))
-      .filter((el): el is HTMLElement => el !== null);
-    const visible = new Map<string, boolean>();
-    const top = window.matchMedia('(min-width: 1024px)').matches ? 80 : 124;
+    const headerOffset = () => (window.matchMedia('(min-width: 1024px)').matches ? 80 : 124);
 
-    const update = () => {
-      const lock = clickLock.current;
-      if (lock && Date.now() < lock.until) return;
-      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
-      if (atBottom && !lock) {
+    const compute = () => {
+      const doc = document.documentElement;
+      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 2) {
         setActive(items[items.length - 1].id);
         return;
       }
-      const first = items.find((item) => visible.get(item.id));
-      if (first) setActive(first.id);
+      const line = headerOffset() + (window.innerHeight - headerOffset()) * 0.4;
+      let current = items[0].id;
+      for (const item of items) {
+        const heading = document.getElementById(`${item.id}-title`);
+        if (heading && heading.getBoundingClientRect().top <= line) current = item.id;
+      }
+      setActive(current);
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) visible.set(entry.target.id, entry.isIntersecting);
-        update();
-      },
-      { rootMargin: `-${top}px 0px -60% 0px` },
-    );
-    sections.forEach((el) => observer.observe(el));
-
-    // 사용자가 직접 스크롤하면 클릭 고정을 푼다
-    const release = () => {
-      if (clickLock.current && Date.now() >= clickLock.current.until) clickLock.current = null;
+    let frame = 0;
+    const onScroll = () => {
+      const lock = clickLock.current;
+      if (lock) {
+        if (!lock.settled) {
+          // 클릭으로 시작된 스크롤이 이어지는 동안은 고정. 스크롤이 200ms 멈추면 고정 해제 준비.
+          window.clearTimeout(lock.timer);
+          lock.timer = window.setTimeout(() => {
+            if (clickLock.current) clickLock.current.settled = true;
+          }, 200);
+          return;
+        }
+        clickLock.current = null; // 클릭 스크롤이 끝난 뒤의 새 스크롤 → 다시 계산
+      }
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(compute);
     };
-    window.addEventListener('wheel', release, { passive: true });
-    window.addEventListener('touchmove', release, { passive: true });
-    window.addEventListener('keydown', release);
+
+    compute();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     return () => {
-      observer.disconnect();
-      window.removeEventListener('wheel', release);
-      window.removeEventListener('touchmove', release);
-      window.removeEventListener('keydown', release);
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
   }, [items]);
 
@@ -73,7 +77,12 @@ export function Toc({ items, variant }: { items: TocItem[]; variant: 'side' | 'b
   }, [active, variant]);
 
   const onClick = (id: string) => {
-    clickLock.current = { id, until: Date.now() + 900 };
+    if (clickLock.current) window.clearTimeout(clickLock.current.timer);
+    // 스크롤이 전혀 일어나지 않는 클릭(이미 그 위치)도 고정이 풀리도록 기본 타이머를 둔다
+    const timer = window.setTimeout(() => {
+      if (clickLock.current) clickLock.current.settled = true;
+    }, 300);
+    clickLock.current = { settled: false, timer };
     setActive(id);
     history.replaceState(null, '', `#${id}`);
   };

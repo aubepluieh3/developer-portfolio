@@ -167,7 +167,8 @@ export interface Project {
   role: string;
   /** 제목 아래 역량 배지 (2~3개) */
   tags: string[];
-  highlights: TextItem[];
+  /** label 이 있으면 굵은 소제목으로 표시한다 */
+  highlights: (TextItem & { label?: string })[];
   overview: {
     rows: [string, string][];
     stacks: { system: string; items: string[] }[];

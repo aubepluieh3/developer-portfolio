@@ -114,7 +114,7 @@ for (const project of projects) {
     for (const link of links) {
       const id = (await link.getAttribute('href')).slice(1);
       await link.click();
-      await page.waitForTimeout(400);
+      await page.waitForTimeout(1500); // 클릭 직후 고정 시간이 끝난 뒤의 상태를 본다
       const r = await page.evaluate((sid) => {
         const h = document.getElementById(`${sid}-title`).getBoundingClientRect();
         const stickyBottom = Math.max(...[...document.querySelectorAll('[data-sticky]')].map((el) => el.getBoundingClientRect().bottom));
@@ -125,6 +125,34 @@ for (const project of projects) {
       else fail(`${tag} ${width}px #${id}: 제목 top ${Math.round(r.top)}, 헤더 ${Math.round(r.stickyBottom)}, 현재 항목 ${current}`);
     }
     if (passed === links.length) ok(`${width}px 목차 ${passed}개 이동·현재 항목 표시 정상`);
+    await page.close();
+  }
+
+  // 2-1) 실제 브라우저처럼 부드러운 스크롤을 켠 상태에서 마지막 항목(회고) 클릭
+  for (const width of [1280, 375]) {
+    const page = await browser.newPage({ viewport: { width, height: width < 768 ? 812 : 800 } });
+    await page.goto(base + URL_, { waitUntil: 'networkidle' });
+    const nav = width >= 1024 ? 'nav[data-toc="side"]' : 'nav[data-toc="bar"]';
+    await page.locator(`${nav} a[href="#retrospective"]`).click();
+    await page.waitForTimeout(3000);
+    const current = await page.locator(`${nav} a[aria-current="true"]`).getAttribute('href');
+    if (current === '#retrospective') ok(`${width}px 부드러운 스크롤로 회고 클릭 시 회고가 현재 항목`);
+    else fail(`${tag} ${width}px 부드러운 스크롤로 회고 클릭 후 현재 항목 ${current} (#retrospective 여야 함)`);
+    await page.close();
+  }
+
+  // 2-2) 휠 없이(스크롤바 드래그처럼) 페이지 맨 아래까지 스크롤하면 마지막 섹션(회고)이 현재 항목이 되는지
+  for (const width of [1280, 375]) {
+    const page = await openPage(URL_, width, width < 768 ? 812 : 800);
+    const nav = width >= 1024 ? 'nav[data-toc="side"]' : 'nav[data-toc="bar"]';
+    // 중간 섹션을 클릭해 둔 뒤 맨 아래로 이동 (클릭 고정이 풀리는지까지 함께 본다)
+    await page.locator(`${nav} a[href="#development"]`).click();
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(800);
+    const current = await page.locator(`${nav} a[aria-current="true"]`).getAttribute('href');
+    if (current === '#retrospective') ok(`${width}px 맨 아래 스크롤 시 회고가 현재 항목`);
+    else fail(`${tag} ${width}px 맨 아래 스크롤 시 현재 항목 ${current} (#retrospective 여야 함)`);
     await page.close();
   }
 

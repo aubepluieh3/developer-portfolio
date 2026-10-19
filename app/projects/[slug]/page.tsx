@@ -87,7 +87,19 @@ function Hero({ project }: { project: Project }) {
         </dd>
         <dt className="text-meta">주요 기여</dt>
         <dd data-hero="highlights">
-          <Bullets items={project.highlights} className="space-y-1" />
+          <ul className="space-y-1">
+            {project.highlights.map((h) => (
+              <li
+                key={h.text}
+                className="relative pl-4 before:absolute before:top-[0.75em] before:left-0 before:h-1 before:w-1 before:rounded-full before:bg-edge"
+              >
+                <Draft evidence={h.evidence}>
+                  {h.label && <span className="font-semibold text-ink">{h.label}: </span>}
+                  {h.text}
+                </Draft>
+              </li>
+            ))}
+          </ul>
         </dd>
       </dl>
     </div>

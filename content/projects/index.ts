@@ -2,8 +2,9 @@ import { findUnverified, stripUnverified } from '../evidence';
 import type { Project } from '../types';
 import { project as firstProject } from './contract-billing';
 import { project as secondProject } from './pg-payment-integration';
+import { project as thirdProject } from './abuse-prevention';
 
-const projects: Project[] = [firstProject, secondProject];
+const projects: Project[] = [firstProject, secondProject, thirdProject];
 
 const isProduction = process.env.NODE_ENV === 'production';
 
