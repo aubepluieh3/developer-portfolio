@@ -110,6 +110,7 @@ export default async function ProjectPage({ params }: Params) {
   const project = getProject((await params).slug);
   if (!project) notFound();
   const { overview, background, architecture, contributions, cases, validation } = project;
+  const compare = background.labels ?? { before: '기존', after: '개선' };
 
   return (
     <>
@@ -175,9 +176,9 @@ export default async function ProjectPage({ params }: Params) {
                 className="hidden grid-cols-[7.5rem_minmax(0,1fr)_2rem_minmax(0,1fr)] gap-x-4 pb-2 text-[13px] font-medium md:grid"
               >
                 <span />
-                <span className="text-meta">기존</span>
+                <span className="text-meta">{compare.before}</span>
                 <span />
-                <span className="text-link">개선</span>
+                <span className="text-link">{compare.after}</span>
               </div>
               <ul className="border-t border-line">
                 {background.comparisons.map((c) => (
@@ -186,14 +187,14 @@ export default async function ProjectPage({ params }: Params) {
                       <div className="grid gap-y-2 md:grid-cols-[7.5rem_minmax(0,1fr)_2rem_minmax(0,1fr)] md:gap-x-4">
                         <p className="text-[15px]/[26px] font-semibold text-ink">{c.topic}</p>
                         <p className="text-[15px]/[26px] text-sub">
-                          <span className="mr-2 text-[13px] font-medium text-meta md:sr-only">기존</span>
+                          <span className="mr-2 text-[13px] font-medium text-meta md:sr-only">{compare.before}</span>
                           {c.before}
                         </p>
                         <span aria-hidden className="hidden text-center text-[15px]/[26px] text-accent md:block">
                           →
                         </span>
                         <p className="text-[15px]/[26px] text-ink">
-                          <span className="mr-2 text-[13px] font-medium text-link md:sr-only">개선</span>
+                          <span className="mr-2 text-[13px] font-medium text-link md:sr-only">{compare.after}</span>
                           {c.after}
                         </p>
                       </div>
@@ -234,7 +235,7 @@ export default async function ProjectPage({ params }: Params) {
                   </p>
 
                   {group.apis && (
-                    <ul aria-label="API 4종" className="mt-6 divide-y divide-line-soft rounded-md bg-soft px-4 text-[15px]/[25px]">
+                    <ul aria-label="주요 API" className="mt-6 divide-y divide-line-soft rounded-md bg-soft px-4 text-[15px]/[25px]">
                       {group.apis.map((api) => (
                         <li key={api.name} className="grid gap-x-4 py-3 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
                           <Draft evidence={api.evidence}>
@@ -264,7 +265,7 @@ export default async function ProjectPage({ params }: Params) {
                     ))}
                   </div>
 
-                  {group.note && <p className="mt-3 text-[14px]/[22px] text-meta">기존 구조 활용 · {group.note}</p>}
+                  {group.note && <p className="mt-3 text-[14px]/[22px] text-meta">{group.noteLabel ?? '기존 구조 활용'} · {group.note}</p>}
                 </div>
               ))}
             </div>
@@ -283,15 +284,15 @@ export default async function ProjectPage({ params }: Params) {
                     {/* 요구사항 · 기존 구조는 회색, 구현은 하늘색 기준선과 진한 글씨로 구분한다 */}
                     <dl className="mt-6 space-y-5 text-[15px]/[26px]">
                       <div className="grid grid-cols-[minmax(0,1fr)] gap-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
-                        <dt className="text-[13px]/[26px] font-medium text-meta">요구사항</dt>
+                        <dt className="text-[13px]/[26px] font-medium text-meta">{c.labels?.requirement ?? '요구사항'}</dt>
                         <dd className="text-sub">{c.requirement}</dd>
                       </div>
                       <div className="grid grid-cols-[minmax(0,1fr)] gap-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
-                        <dt className="text-[13px]/[26px] font-medium text-meta">기존 구조</dt>
+                        <dt className="text-[13px]/[26px] font-medium text-meta">{c.labels?.existing ?? '기존 구조'}</dt>
                         <dd className="text-sub">{c.existing}</dd>
                       </div>
                       <div className="grid grid-cols-[minmax(0,1fr)] gap-1 pt-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
-                        <dt className="text-[13px]/[26px] font-semibold text-link">구현</dt>
+                        <dt className="text-[13px]/[26px] font-semibold text-link">{c.labels?.implementation ?? '구현'}</dt>
                         <dd className="min-w-0 border-l-2 border-sky pl-4">
                           <ul className="space-y-2">
                             {c.implementation.map((line) =>
@@ -336,6 +337,7 @@ export default async function ProjectPage({ params }: Params) {
                               </tbody>
                             </table>
                           )}
+                          {c.conclusion && <p className="mt-5 text-ink">{c.conclusion}</p>}
                           {c.more && <More more={c.more} />}
                         </dd>
                       </div>

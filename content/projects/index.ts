@@ -3,8 +3,9 @@ import type { Project } from '../types';
 import { project as firstProject } from './contract-billing';
 import { project as secondProject } from './pg-payment-integration';
 import { project as thirdProject } from './abuse-prevention';
+import { project as fourthProject } from './op2-operation-system';
 
-const projects: Project[] = [firstProject, secondProject, thirdProject];
+const projects: Project[] = [firstProject, secondProject, thirdProject, fourthProject];
 
 const isProduction = process.env.NODE_ENV === 'production';
 

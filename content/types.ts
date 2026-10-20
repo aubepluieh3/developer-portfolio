@@ -59,6 +59,8 @@ export interface ContributionGroup {
   apis?: ApiItem[];
   /** 기존 구조를 활용한 부분 (보조 설명) */
   note?: string;
+  /** note 앞 라벨 (기본 '기존 구조 활용') */
+  noteLabel?: string;
 }
 
 export type Lane = string;
@@ -144,6 +146,10 @@ export interface CaseStudy extends Sourced {
   implementation: (string | { label: string; text: string })[];
   /** 구현 안에서 비교를 보여주는 작은 표 */
   table?: { caption?: string; columns: string[]; rows: string[][] };
+  /** 구현 아래에 붙는 한 문장 정리 */
+  conclusion?: string;
+  /** 항목 라벨 (기본 '요구사항' / '기존 구조' / '구현') */
+  labels?: { requirement?: string; existing?: string; implementation?: string };
   more?: More;
 }
 
@@ -178,6 +184,8 @@ export interface Project {
     collaborationLabel?: string;
   };
   background: {
+    /** 비교 열 제목 (기본 '기존' / '개선') */
+    labels?: { before: string; after: string };
     comparisons: (Sourced & { topic: string; before: string; after: string })[];
     approach: TextItem[];
   };
