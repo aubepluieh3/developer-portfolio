@@ -7,6 +7,8 @@ import './globals.css';
 export const metadata: Metadata = {
   title: '포트폴리오',
   description: '풀스택 개발자 포트폴리오',
+  // 링크를 받은 사람만 보도록 검색 엔진 노출을 막는다 (vercel.json 의 X-Robots-Tag 와 함께)
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
