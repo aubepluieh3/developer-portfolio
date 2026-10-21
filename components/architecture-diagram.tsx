@@ -54,11 +54,12 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
   }, [flow]);
 
   const stepNumber = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, number[]>();
     flow?.steps.forEach((s, i) => {
-      if (!map.has(s.node)) map.set(s.node, i + 1);
+      const nums = map.get(s.node) ?? [];
+      if (nums.length === 0 || flow.showAllSteps) map.set(s.node, [...nums, i + 1]);
     });
-    return map;
+    return new Map([...map].map(([id, nums]) => [id, nums.join('·')]));
   }, [flow]);
 
   const isEdgeActive = (e: ArchEdge) => emphasis?.edgeSet.has(edgeKey(e.from, e.to)) ?? false;
@@ -195,7 +196,7 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
                 {num !== undefined && (
                   <span
                     aria-hidden
-                    className="absolute -top-2.5 -left-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-link text-[11px] font-semibold text-white"
+                    className="absolute -top-2.5 -left-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-link px-1 text-[11px] font-semibold text-white"
                   >
                     {num}
                   </span>
@@ -292,6 +293,16 @@ function FlowSteps({ flow, byId }: { flow: Flow; byId: Map<string, ArchNode> }) 
           </li>
         ))}
       </ol>
+      {flow.sections && (
+        <div className="mt-6 space-y-4 border-t border-line-soft pt-5">
+          {flow.sections.map((sec) => (
+            <div key={sec.title}>
+              <p className="text-[15px]/[24px] font-semibold text-ink">{sec.title}</p>
+              <p className="mt-1 text-[15px]/[25px] text-sub">{sec.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

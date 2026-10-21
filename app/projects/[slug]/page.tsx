@@ -149,20 +149,24 @@ export default async function ProjectPage({ params }: Params) {
                   </p>
                 ))}
               </dd>
-              <dt className="text-meta">{overview.collaborationLabel ?? '협업 및 기존 구조 활용'}</dt>
-              <dd className="-mt-3 space-y-1 text-sub sm:mt-0">
-                {overview.collaboration.map((c) => (
-                  <Draft key={c.text} evidence={c.evidence}>
-                    <p>{c.text}</p>
-                  </Draft>
-                ))}
-              </dd>
+              {overview.collaboration.length > 0 && (
+                <>
+                  <dt className="text-meta">{overview.collaborationLabel ?? '협업 및 기존 구조 활용'}</dt>
+                  <dd className="-mt-3 space-y-1 text-sub sm:mt-0">
+                    {overview.collaboration.map((c) => (
+                      <Draft key={c.text} evidence={c.evidence}>
+                        <p>{c.text}</p>
+                      </Draft>
+                    ))}
+                  </dd>
+                </>
+              )}
             </dl>
           </Section>
 
           {/* 02 */}
           <Section id="background" num="02" title="프로젝트 배경">
-            <div className={`${prose} mb-8`}>
+            <div className={`${prose} mb-8 space-y-4`}>
               {background.approach.map((a) => (
                 <Draft key={a.text} evidence={a.evidence}>
                   <p>{a.text}</p>

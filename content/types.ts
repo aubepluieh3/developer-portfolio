@@ -128,6 +128,10 @@ export interface Flow {
   /** 다이어그램에서 강조할 연결선 [from, to] */
   path: [string, string][];
   steps: FlowStep[];
+  /** 한 노드를 여러 단계가 지나면 노드 번호를 모두 표시 (예: 1·3·4). 기본은 첫 번호만 */
+  showAllSteps?: boolean;
+  /** 같은 경로를 쓰는 서로 독립된 작업을 단계 목록 아래에 소제목으로 나눠 설명 */
+  sections?: { title: string; text: string }[];
 }
 
 export interface Architecture {
