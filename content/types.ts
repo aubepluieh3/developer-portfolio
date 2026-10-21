@@ -135,6 +135,8 @@ export interface Flow {
 }
 
 export interface Architecture {
+  /** 단계 번호를 붙일 노드 모서리 (기본 왼쪽 위). 화살표가 왼쪽 위로 들어오는 배치에서 겹침을 피한다 */
+  badgeCorner?: 'top-left' | 'top-right';
   lanes: LaneDef[];
   roles: { label: string; text: string }[];
   nodes: ArchNode[];
@@ -145,7 +147,8 @@ export interface Architecture {
 export interface CaseStudy extends Sourced {
   title: string;
   requirement: string;
-  existing: string;
+  /** 없으면 기존 구조 행을 그리지 않는다 */
+  existing?: string;
   /** 문자열, 또는 굵은 소제목이 붙는 항목 */
   implementation: (string | { label: string; text: string })[];
   /** 구현 안에서 비교를 보여주는 작은 표 */

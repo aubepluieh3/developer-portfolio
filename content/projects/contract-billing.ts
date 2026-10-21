@@ -15,7 +15,7 @@ export const project: Project = {
   meta: 'B2B 전자계약 SaaS · 2024.05 – 2024.08 개발 · 2024.10 운영 반영',
   summary:
     '기업 계약 관리와 선불 과금을 결합한 신규 요금제의 계약·충전·사용량 기능을 사내 운영관리시스템과 고객 서비스 양쪽에 구현했습니다.',
-  role: '설계 · 백엔드 · 운영 화면 개발 · 검증',
+  role: '설계 · Back-end · 운영 화면 개발 · 검증',
   tags: ['풀스택 개발', '시스템 연동', '데이터 모델링'],
   highlights: [
     { text: '계약·옵션·분납 데이터 모델을 설계하고 기존 계약 관리 기능을 확장', evidence: 'git' },
@@ -26,7 +26,7 @@ export const project: Project = {
   overview: {
     rows: [
       ['기간', '2024.05 – 2024.08 개발 · 2024.10 운영 반영 · 이후 유지보수'],
-      ['담당 역할', '데이터 모델·기능 상세 설계, 백엔드와 운영 화면 개발, 기능 검증과 운영 대응'],
+      ['담당 역할', '데이터 모델·기능 상세 설계, Back-end와 운영 화면 개발, 기능 검증과 운영 대응'],
     ],
     stacks: [
       { system: '운영관리시스템', items: ['Java 8', 'Spring Boot', 'MyBatis', 'MariaDB', 'JSP', 'jQuery'] },

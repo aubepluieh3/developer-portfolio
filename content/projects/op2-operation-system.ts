@@ -2,7 +2,7 @@ import type { Project } from '../types';
 
 // 공개 원칙: 회사·고객사명, 실제 데이터 모델·필드명, API 경로, 운영 수치, 정산 정책 값, 내부 코드,
 // 번호 발급 방식 등 내부 구현 세부, 내부 오류·검증 환경 세부, 종료 사유는 쓰지 않는다.
-// 수치: 백엔드 테스트는 실행 시점과 함께만 쓰고, 프론트엔드 테스트 수와 검사 시간 비교는 쓰지 않는다.
+// 수치: Back-end 테스트는 실행 시점과 함께만 쓰고, Front-end 테스트 수와 검사 시간 비교는 쓰지 않는다.
 // 근거 상세는 저장소 밖 portfolio-private/evidence-matrix-op2.md 에 있다.
 
 export const project: Project = {
@@ -10,14 +10,14 @@ export const project: Project = {
   title: '고객·계약·청구 통합 운영관리시스템 개발 (OP2)',
   listing: {
     description:
-      '운영관리시스템과 스프레드시트에 나뉘어 있던 고객·계약·청구 업무를 한 시스템으로 옮기기 위해, 요구사항 분석부터 프론트엔드·백엔드 구현과 검증까지 진행했습니다.',
+      '운영관리시스템과 스프레드시트에 나뉘어 있던 고객·계약·청구 업무를 한 시스템으로 옮기기 위해, 요구사항 분석부터 Front-end·Back-end 구현과 검증까지 진행했습니다.',
     stack: ['풀스택', 'React', 'TanStack Query', 'Spring Boot', 'jOOQ'],
     year: '2026',
     status: '운영 미반영',
   },
   meta: '사내 운영 시스템 · 2026.08 – 2026.09 · 개발 환경 구현 · 운영 미반영',
   summary:
-    '기존 운영관리시스템과 스프레드시트에 나뉘어 있던 고객·계약·청구 업무를 통합하기 위한 시스템을 개발했습니다. 현업 담당자와 직접 소통하며 불편한 점을 파악하고 필요한 기능을 기획했습니다. 이후 도메인 설계부터 프론트엔드·백엔드 구현과 검증까지 주도했습니다.',
+    '기존 운영관리시스템과 스프레드시트에 나뉘어 있던 고객·계약·청구 업무를 통합하기 위한 시스템을 개발했습니다. 현업 담당자와 직접 소통하며 불편한 점을 파악하고 필요한 기능을 기획했습니다. 이후 도메인 설계부터 Front-end·Back-end 구현과 검증까지 주도했습니다.',
   role: '요구사항 분석 · 기능 기획 · 도메인 설계 · 풀스택 개발 · 검증',
   tags: ['풀스택 개발', '도메인 설계', 'AI 협업 개발'],
   highlights: [
@@ -27,7 +27,7 @@ export const project: Project = {
       evidence: 'git',
     },
     {
-      label: '청구·입금 백엔드 개발',
+      label: '청구·입금 Back-end 개발',
       text: '청구 등록의 멱등 처리, 입금 연결의 동시성 제어 및 연결 이력 관리 구현',
       evidence: 'git',
     },
@@ -42,11 +42,11 @@ export const project: Project = {
     rows: [
       ['기간', '2026.08 – 2026.09'],
       ['진행 결과', '개발 환경에서 주요 기능 구현·검증 · 운영 미반영'],
-      ['담당 역할', '단독 담당 개발자 — 요구사항 분석, 도메인·상세 설계, 프론트엔드·백엔드 개발, 테스트·검증'],
+      ['담당 역할', '단독 담당 개발자 — 요구사항 분석, 도메인·상세 설계, Front-end·Back-end 개발, 테스트·검증'],
       ['개발 방식', 'Claude Code를 활용해 개발했으며, 요구사항 분석과 설계 방향 수립, 구현 결과 검토 및 테스트를 직접 진행했습니다.'],
     ],
     stacks: [
-      { system: '백엔드', items: ['Java 21', 'Spring Boot', 'jOOQ', 'PostgreSQL', 'Flyway'] },
+      { system: 'Back-end', items: ['Java 21', 'Spring Boot', 'jOOQ', 'PostgreSQL', 'Flyway'] },
       { system: '화면', items: ['React 19', 'TypeScript', 'TanStack Query'] },
       { system: '검증', items: ['JUnit', 'Testcontainers', 'Vitest', 'Playwright'] },
       { system: '개발 환경', items: ['Claude Code', 'Git Worktree', 'Git Hook'] },
@@ -311,7 +311,7 @@ export const project: Project = {
     {
       id: 'domain',
       title: '그룹사·매출처 데이터 모델과 기능',
-      system: '요구사항 분석 · 백엔드 · 화면',
+      system: '요구사항 분석 · Back-end · 화면',
       summary: '현업 설명과 기존 데이터 분석을 바탕으로, 기존 시스템에 없던 그룹사와 매출처를 데이터 모델과 기능으로 만들었습니다.',
       units: [
         {
@@ -346,7 +346,7 @@ export const project: Project = {
     {
       id: 'billing',
       title: '청구·입금 서버 API와 정합성',
-      system: '백엔드',
+      system: 'Back-end',
       summary: '청구 등록과 입금 연결에서 재시도와 동시 요청이 있어도 금액과 이력이 어긋나지 않도록 서버 처리를 구현했습니다.',
       emphasis: '재시도와 동시 요청',
       units: [
@@ -385,7 +385,7 @@ export const project: Project = {
     {
       id: 'screen',
       title: '업무 화면의 서버 상태 관리와 동시 편집',
-      system: '프론트엔드 · 백엔드',
+      system: 'Front-end · Back-end',
       summary: '조회 결과가 언제 최신인지, 다른 사람이 먼저 고쳤는지, 새로고침 뒤에도 같은 화면인지가 분명하게 보이도록 화면을 만들었습니다.',
       units: [
         {
@@ -396,7 +396,7 @@ export const project: Project = {
         },
         {
           title: '동시 편집 충돌 처리',
-          body: '화면을 연 시점의 수정 시각을 저장 요청에 함께 보냅니다. 그 사이 다른 사람이 먼저 저장했다면 서버는 덮어쓰지 않고 충돌로 응답하고, 화면은 새로 고쳐 확인한 뒤 다시 저장하도록 안내합니다. 프론트엔드와 백엔드를 함께 구현했고, 고객사·채널·쿠폰 수정 화면에 적용했습니다.',
+          body: '화면을 연 시점의 수정 시각을 저장 요청에 함께 보냅니다. 그 사이 다른 사람이 먼저 저장했다면 서버는 덮어쓰지 않고 충돌로 응답하고, 화면은 새로 고쳐 확인한 뒤 다시 저장하도록 안내합니다. Front-end와 Back-end를 함께 구현했고, 고객사·채널·쿠폰 수정 화면에 적용했습니다.',
           ownership: ['new'],
           emphasis: '덮어쓰지 않고 충돌로 응답',
           evidence: 'git',
@@ -420,7 +420,7 @@ export const project: Project = {
     {
       id: 'overage',
       title: '계약 등록 및 초과 사용분 정산',
-      system: '백엔드 · 화면',
+      system: 'Back-end · 화면',
       summary:
         '기존 계약 등록 업무를 참고해 OP2의 계약 관리 기능을 새로 구현하고, 담당자가 계약 등록과 별도로 처리하던 초과 사용분 정산을 계약 등록 흐름 안에서 확인하고 정할 수 있게 했습니다.',
       emphasis: '계약 등록 흐름 안에서',
@@ -535,8 +535,8 @@ export const project: Project = {
   validation: {
     groups: [
       {
-        title: '백엔드',
-        emphasis: '백엔드 자동화 테스트 1,282건이 통과했습니다',
+        title: 'Back-end',
+        emphasis: 'Back-end 자동화 테스트 1,282건이 통과했습니다',
         paragraphs: [
           {
             text: '청구 등록의 반복·동시 요청에서 중복 데이터가 생성되지 않는지 검증하고, 입금 연결 시 동시 요청으로 연결 금액이 초과되지 않는지 테스트했습니다.',
@@ -546,11 +546,11 @@ export const project: Project = {
             text: '그룹 계약에서는 계약 등록 시점의 공유 대상이 저장되는지와 개별 계약의 적용 범위를 확인했습니다.',
             evidence: 'git',
           },
-          { text: '2026년 10월 16일 로컬 실행 기준, 백엔드 자동화 테스트 1,282건이 통과했습니다.', evidence: 'git' },
+          { text: '2026년 10월 16일 로컬 실행 기준, Back-end 자동화 테스트 1,282건이 통과했습니다.', evidence: 'git' },
         ],
       },
       {
-        title: '프론트엔드',
+        title: 'Front-end',
         paragraphs: [
           {
             text: '데이터 재조회와 오류 처리, 중복 저장 방지, 동시 편집 충돌 안내, URL 기반 화면 상태 유지 등 주요 동작을 브라우저에서 검증했습니다.',

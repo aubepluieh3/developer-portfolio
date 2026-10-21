@@ -291,10 +291,12 @@ export default async function ProjectPage({ params }: Params) {
                         <dt className="text-[13px]/[26px] font-medium text-meta">{c.labels?.requirement ?? '요구사항'}</dt>
                         <dd className="text-sub">{c.requirement}</dd>
                       </div>
-                      <div className="grid grid-cols-[minmax(0,1fr)] gap-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
-                        <dt className="text-[13px]/[26px] font-medium text-meta">{c.labels?.existing ?? '기존 구조'}</dt>
-                        <dd className="text-sub">{c.existing}</dd>
-                      </div>
+                      {c.existing && (
+                        <div className="grid grid-cols-[minmax(0,1fr)] gap-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
+                          <dt className="text-[13px]/[26px] font-medium text-meta">{c.labels?.existing ?? '기존 구조'}</dt>
+                          <dd className="text-sub">{c.existing}</dd>
+                        </div>
+                      )}
                       <div className="grid grid-cols-[minmax(0,1fr)] gap-1 pt-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
                         <dt className="text-[13px]/[26px] font-semibold text-link">{c.labels?.implementation ?? '구현'}</dt>
                         <dd className="min-w-0 border-l-2 border-sky pl-4">

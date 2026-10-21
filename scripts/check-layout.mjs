@@ -222,6 +222,26 @@ for (const project of projects) {
   }
 }
 
+// 7) 홈 목록 아래쪽에서 프로젝트를 열면 상세 페이지가 맨 위에서 바로 시작하는지
+//    (부드러운 스크롤이 켜진 실제 브라우저 조건: 페이지 이동 때 맨 아래에서 위로 굴러 올라가면 안 된다)
+console.log('\n[home → 상세 이동]');
+for (const width of [1280, 375]) {
+  for (const project of projects) {
+    const page = await browser.newPage({ viewport: { width, height: width < 768 ? 812 : 800 } });
+    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    const link = page.locator(`a[href="/projects/${project.slug}"]`).first();
+    await link.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    await link.click();
+    await page.waitForURL(`**/projects/${project.slug}`);
+    await page.waitForTimeout(120); // 이동 직후. 스크롤 애니메이션 중이면 여기서 0이 아니다
+    const y = await page.evaluate(() => window.scrollY);
+    if (y === 0) ok(`${width}px ${project.slug} 상세 진입 시 맨 위에서 시작`);
+    else fail(`${project.slug} ${width}px 상세 진입 120ms 뒤 scrollY ${Math.round(y)} (0이어야 함)`);
+    await page.close();
+  }
+}
+
 await browser.close();
 server.close();
 

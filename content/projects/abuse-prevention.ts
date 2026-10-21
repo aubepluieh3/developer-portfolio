@@ -31,7 +31,7 @@ export const project: Project = {
     },
     {
       label: '서비스 전반의 사용 정지 적용',
-      text: '사용자 역할별 안내와 주요 서비스 기능의 접근 제한을 프론트엔드·백엔드에 적용',
+      text: '사용자 역할별 안내와 주요 서비스 기능의 접근 제한을 Front-end·Back-end에 적용',
       evidence: 'git',
     },
   ],

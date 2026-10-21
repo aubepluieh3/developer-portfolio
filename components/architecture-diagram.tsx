@@ -38,7 +38,7 @@ const edgeKey = (from: string, to: string) => `${from}>${to}`;
 
 /** 시나리오 칩 + 다이어그램 + 하단 설명 패널. 기본 상태에서도 전체 구조와 흐름 요약이 보인다. */
 export function ArchitectureExplorer({ architecture }: { architecture: Architecture }) {
-  const { nodes, edges, lanes, flows } = architecture;
+  const { nodes, edges, lanes, flows, badgeCorner } = architecture;
   const [flowId, setFlowId] = useState<string>('all');
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -196,7 +196,7 @@ export function ArchitectureExplorer({ architecture }: { architecture: Architect
                 {num !== undefined && (
                   <span
                     aria-hidden
-                    className="absolute -top-2.5 -left-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-link px-1 text-[11px] font-semibold text-white"
+                    className={`absolute -top-2.5 ${badgeCorner === 'top-right' ? '-right-2.5' : '-left-2.5'} flex h-5 min-w-5 items-center justify-center rounded-full bg-link px-1 text-[11px] font-semibold text-white`}
                   >
                     {num}
                   </span>
