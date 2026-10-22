@@ -139,14 +139,10 @@ export function NameCard({ profile }: { profile: Profile }) {
         </div>
       </div>
 
-      <div className="mt-10 flex items-end gap-2 md:mt-12">
-        <svg aria-hidden viewBox="0 0 60 36" className="mb-2 hidden h-7 w-12 text-[#7b8aa3] sm:block" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-          <path d="M56 30C38 34 14 28 8 6M8 6 4 14M8 6l8 5" />
-        </svg>
-        <p aria-live="polite" className="text-[14px] text-[#4b5566] sm:text-[15px]">
-          {touched ? (back ? '다시 누르면 앞면으로 돌아갑니다' : '명함 앞면 · 01 / 02') : '클릭해서 명함을 뒤집어 보세요'}
-        </p>
-      </div>
+      {/* 화면 안내 문구는 두지 않고, 뒤집힌 면만 화면 낭독기에 알린다 */}
+      <p aria-live="polite" className="sr-only">
+        {touched ? (back ? '명함 뒷면' : '명함 앞면') : ''}
+      </p>
     </div>
   );
 }
