@@ -147,8 +147,8 @@ export interface Architecture {
 export interface CaseStudy extends Sourced {
   title: string;
   requirement: string;
-  /** 없으면 기존 구조 행을 그리지 않는다 */
-  existing?: string;
+  /** 없으면 기존 구조 행을 그리지 않는다. 굵은 소제목이 붙는 항목 목록도 된다 */
+  existing?: string | { label: string; text: string }[];
   /** 문자열, 또는 굵은 소제목이 붙는 항목 */
   implementation: (string | { label: string; text: string })[];
   /** 구현 안에서 비교를 보여주는 작은 표 */

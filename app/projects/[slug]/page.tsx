@@ -294,7 +294,19 @@ export default async function ProjectPage({ params }: Params) {
                       {c.existing && (
                         <div className="grid grid-cols-[minmax(0,1fr)] gap-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
                           <dt className="text-[13px]/[26px] font-medium text-meta">{c.labels?.existing ?? '기존 구조'}</dt>
-                          <dd className="text-sub">{c.existing}</dd>
+                          {typeof c.existing === 'string' ? (
+                            <dd className="text-sub">{c.existing}</dd>
+                          ) : (
+                            <dd className="min-w-0">
+                              <ul className="space-y-2">
+                                {c.existing.map((item) => (
+                                  <li key={item.label} className="text-sub">
+                                    <span className="font-medium text-ink">{item.label}:</span> {item.text}
+                                  </li>
+                                ))}
+                              </ul>
+                            </dd>
+                          )}
                         </div>
                       )}
                       <div className="grid grid-cols-[minmax(0,1fr)] gap-1 pt-1 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:gap-4">
