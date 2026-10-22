@@ -301,7 +301,7 @@ console.log('\n[about]');
     const note = await page.locator('#orbit-note').innerText();
     await page.keyboard.press('Escape');
     const cleared = await page.locator('#orbit-note').innerText();
-    if (hoverTf.includes('translateY(-6px)') && Number(px) > 0.3 && note.includes('TypeScript로') && !cleared.includes('TypeScript로'))
+    if (hoverTf.includes('translateY(-6px)') && Number(px) > 0.3 && note.includes('TypeScript') && note.includes('데이터 구조') && !cleared.includes('데이터 구조'))
       ok(`기술 카드 hover 떠오름, 포인터 반응(--px ${px}), 클릭 설명, Esc 해제`);
     else fail(`about 기술 카드 ${JSON.stringify({ hoverTf, px, note, cleared })}`);
     await ctx.close();
@@ -359,7 +359,7 @@ console.log('\n[about]');
     await page.locator('#about-contact').scrollIntoViewIfNeeded();
     await page.locator('[data-card]').tap({ position: await cardPoint(page) });
     const s = await page.locator('[data-card]').getAttribute('data-side');
-    if (note.includes('Java로') && s === 'back') ok('375px 터치: 기술 설명 표시, 명함 탭으로 뒤집힘');
+    if (note.includes('Java') && note.includes('서버 처리 로직') && s === 'back') ok('375px 터치: 기술 설명 표시, 명함 탭으로 뒤집힘');
     else fail(`about 터치 ${JSON.stringify({ note, s })}`);
     await ctx.close();
   }

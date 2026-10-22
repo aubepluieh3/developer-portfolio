@@ -1,9 +1,9 @@
 import { findUnverified, stripUnverified } from '../evidence';
 import type { Project } from '../types';
 import { project as firstProject } from './contract-billing';
-import { project as secondProject } from './pg-payment-integration';
-import { project as thirdProject } from './abuse-prevention';
-import { project as fourthProject } from './op2-operation-system';
+import { project as secondProject } from './abuse-prevention';
+import { project as thirdProject } from './op2-operation-system';
+import { project as fourthProject } from './pg-payment-integration';
 import { project as fifthProject } from './security-pledge';
 
 const projects: Project[] = [firstProject, secondProject, thirdProject, fourthProject, fifthProject];

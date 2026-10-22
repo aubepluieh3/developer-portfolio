@@ -17,17 +17,17 @@ import { usePointerField } from './use-pointer-field';
  */
 
 type TechId = keyof typeof TECH_LOGO;
-type Tech = { id: TechId; name: string; x: number; mx: number; y: number; depth: number; note: string };
+type Tech = { id: TechId; name: string; x: number; mx: number; y: number; depth: number; note: string; workflow?: boolean };
 
 // 위치는 오른쪽 영역(가로 560 × 세로 460) 기준 카드 중심 %. x 는 1024px 이상, mx 는 그보다 좁은 화면.
 // note 는 실제 프로젝트에서 확인된 사용 범위
 const TECH: Tech[] = [
-  { id: 'react', name: 'React', x: 72, mx: 70, y: 12, depth: 18, note: 'OP2 업무 화면을 React와 TanStack Query로 만들었습니다.' },
-  { id: 'typescript', name: 'TypeScript', x: 20, mx: 25, y: 30, depth: 26, note: '보안서약서 관리 시스템의 일괄 결재·캠페인 화면을 TypeScript로 개발했습니다.' },
-  { id: 'spring', name: 'Spring', x: 89, mx: 77, y: 41, depth: 22, note: 'Spring Boot·Spring MVC 기반 API와 MyBatis·JPA·jOOQ 데이터 처리를 다뤘습니다.' },
-  { id: 'javascript', name: 'JavaScript', x: 21, mx: 24, y: 73, depth: 30, note: '운영관리시스템과 고객 화면을 JavaScript로 개발했습니다.' },
-  { id: 'java', name: 'Java', x: 64, mx: 66, y: 86, depth: 20, note: '요금제·결제 연동·악용 방지 기능의 서버 로직을 Java로 구현했습니다.' },
-  { id: 'claude', name: 'Claude Code', x: 30, mx: 26, y: 1, depth: 16, note: 'Claude AI를 활용해서 개발했습니다.' },
+  { id: 'react', name: 'React', x: 72, mx: 70, y: 12, depth: 18, note: '업무 흐름을 화면으로 옮기고, 서버 데이터와 사용자 상태를 연결합니다.' },
+  { id: 'typescript', name: 'TypeScript', x: 20, mx: 25, y: 30, depth: 26, note: '타입으로 데이터 구조를 확인하고, 화면 개발 과정의 실수를 줄입니다.' },
+  { id: 'spring', name: 'Spring', x: 89, mx: 77, y: 41, depth: 22, note: 'API와 비즈니스 로직을 구성하고, 데이터 저장·조회 흐름을 연결합니다.' },
+  { id: 'javascript', name: 'JavaScript', x: 21, mx: 24, y: 73, depth: 30, note: '기존 서비스의 화면을 개선하고, 사용자 동작에 맞춰 기능을 확장합니다.' },
+  { id: 'java', name: 'Java', x: 64, mx: 66, y: 86, depth: 20, note: '결제·요금제·운영 기능의 서버 처리 로직을 구현합니다.' },
+  { id: 'claude', name: 'Claude Code', x: 30, mx: 26, y: 1, depth: 16, note: '코드 탐색부터 구현·검증까지, AI를 개발 과정에 활용합니다.', workflow: true },
 ];
 const W = 560;
 const H = 460;
@@ -136,7 +136,7 @@ export function IdentityOrbit({ profile }: { profile: Profile }) {
               ref={field.ref}
               {...field.handlers}
               data-orbit
-              className="relative mx-auto mt-6 aspect-[560/460] w-full max-w-[560px] md:mt-0"
+              className="relative mx-auto mt-6 mb-[116px] aspect-[560/460] w-full max-w-[560px] md:mt-0 xl:mb-0"
             >
               <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full overflow-visible" style={shift(6)}>
                 <g transform={`rotate(${TILT} ${C.x} ${C.y})`}>
@@ -165,24 +165,37 @@ export function IdentityOrbit({ profile }: { profile: Profile }) {
                   aria-hidden
                   className="absolute -top-[15px] -left-[15px] h-[30px] w-[30px] rounded-full bg-[radial-gradient(circle_at_35%_30%,#a5d0ff,#3b82f6_70%)] shadow-[0_6px_16px_rgba(59,130,246,0.35)]"
                 />
-                <p
-                  id="orbit-note"
-                  aria-live="polite"
-                  className="absolute top-7 left-2 w-[clamp(150px,22vw,230px)] text-[12.5px]/[20px] text-[#4b5566] lg:left-[-6px]"
-                >
-                  {chosen ? (
-                    <span key={chosen.id} className="block motion-safe:animate-[note-in_220ms_cubic-bezier(0.2,0.8,0.2,1)]">
-                      <span className="mb-0.5 block font-mono text-[11px] text-[#1d4ed8]">{chosen.name}</span>
-                      {chosen.note}
-                    </span>
-                  ) : (
-                    <>
-                      화면과 서버를
+              </div>
+
+              {/* 설명 영역: 높이를 고정해 어떤 기술을 골라도 자리가 흔들리지 않는다.
+                  1280px 이상은 가운데 점 오른쪽 아래, 그보다 좁으면 궤도 아래에 둔다 (카드와 겹치지 않게) */}
+              <div
+                id="orbit-note"
+                aria-live="polite"
+                className="absolute top-[calc(100%+16px)] left-1/2 h-[92px] w-[min(100%,300px)] -translate-x-1/2 rounded-2xl bg-white/90 px-4 py-3 shadow-[0_8px_24px_-14px_rgba(30,64,120,0.25)] ring-1 ring-[#e3ecf8] backdrop-blur-sm xl:top-[calc(48%+24px)] xl:left-[calc(46%-14px)] xl:w-[264px] xl:translate-x-0"
+              >
+                {chosen ? (
+                  <div key={chosen.id} className="motion-safe:animate-[note-in_220ms_cubic-bezier(0.2,0.8,0.2,1)]">
+                    <p className="flex items-center gap-2">
+                      <span className="text-[14px] font-semibold text-[#1d4ed8]">{chosen.name}</span>
+                      {chosen.workflow && (
+                        <span className="rounded-full bg-[#fdf1ec] px-2 py-px text-[10.5px] font-medium tracking-[0.02em] text-[#b4542f]">
+                          Development workflow
+                        </span>
+                      )}
+                    </p>
+                    <p className="mt-1 text-[13px]/[20px] text-[#3f4a5c]">{chosen.note}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-[11px] font-medium tracking-[0.16em] text-[#7b8698]">TECH STACK</p>
+                    <p className="mt-1 text-[13px]/[20px] text-[#3f4a5c]">
+                      화면과 서버를 함께 만듭니다.
                       <br />
-                      함께 만듭니다.
-                    </>
-                  )}
-                </p>
+                      카드를 눌러 활용 방식을 확인해 보세요.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {TECH.map((t) => {

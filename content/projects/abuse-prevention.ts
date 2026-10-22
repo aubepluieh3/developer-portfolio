@@ -13,7 +13,7 @@ export const project: Project = {
     stack: ['풀스택', 'Spring', 'JPA', 'MyBatis', 'JavaScript'],
     year: '2025',
   },
-  meta: 'B2B 전자계약 SaaS · 2025.07 – 2025.09 · 이후 운영 개선',
+  meta: 'B2B 전자계약 SaaS · 2025.07 – 2025.08 · 이후 운영 개선',
   summary:
     '운영팀이 수작업으로 관리하던 의심 고객을 서비스에서 자동으로 탐지·등록하고, 운영자가 운영관리시스템에서 확인하고 사용 정지·해제할 수 있도록 구현했습니다.',
   role: '기술 설계 · 풀스택 개발',
@@ -38,7 +38,7 @@ export const project: Project = {
 
   overview: {
     rows: [
-      ['기간', '2025.07 – 2025.09 · 이후 운영 개선'],
+      ['기간', '2025.07 – 2025.08 · 이후 운영 개선'],
       ['진행 결과', '2025년 9월 운영 반영'],
       ['담당 역할', '기술 설계 및 풀스택 개발'],
     ],
@@ -47,12 +47,8 @@ export const project: Project = {
       { system: '운영관리시스템', items: ['Spring Boot', 'MyBatis', 'JSP'] },
       { system: '화면', items: ['JavaScript', 'jQuery'] },
     ],
-    collaboration: [
-      {
-        text: '악용 방지 정책은 기획팀에서 정의하고, 화면 스타일은 별도 담당자가 구현했습니다. 기존 비동기 연동 구조와 데이터 수집기, 메일 발송 기능을 활용해 신규 기능을 개발했습니다.',
-        evidence: 'doc',
-      },
-    ],
+    // 기획팀 정책은 02, 기존 구조는 03 노드, 화면 스타일 담당은 04.4 에서 구분한다
+    collaboration: [],
   },
 
   background: {
@@ -436,7 +432,7 @@ export const project: Project = {
           evidence: 'git',
         },
       ],
-      note: '안내 화면은 기존 연체 안내 흐름을 재사용했고, 정지 상태 판단과 접근 제한은 새로 구현했습니다.',
+      note: '안내 화면은 기존 연체 안내 흐름을 재사용했고, 정지 상태 판단과 접근 제한은 새로 구현했습니다. 화면 스타일은 별도 담당자가 구현했습니다.',
     },
   ],
 
