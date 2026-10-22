@@ -1,10 +1,11 @@
 import { findUnverified, stripUnverified } from '../evidence';
 import type { Project } from '../types';
-import { project as firstProject } from './contract-billing';
-import { project as secondProject } from './abuse-prevention';
-import { project as thirdProject } from './op2-operation-system';
-import { project as fourthProject } from './pg-payment-integration';
-import { project as fifthProject } from './security-pledge';
+// 풀스택 지원 기준 순서
+import { project as firstProject } from './op2-operation-system';
+import { project as secondProject } from './contract-billing';
+import { project as thirdProject } from './abuse-prevention';
+import { project as fourthProject } from './security-pledge';
+import { project as fifthProject } from './pg-payment-integration';
 
 const projects: Project[] = [firstProject, secondProject, thirdProject, fourthProject, fifthProject];
 
