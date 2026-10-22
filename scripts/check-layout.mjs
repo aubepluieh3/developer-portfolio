@@ -242,6 +242,159 @@ for (const width of [1280, 375]) {
   }
 }
 
+// 8) 소개(/about): 기술 카드·명함 뒤집기, 키보드·터치·움직임 줄이기·인쇄
+console.log('\n[about]');
+{
+  const ABOUT = '/about';
+  const ctxPage = async (width, opts = {}) => {
+    const ctx = await browser.newContext({ viewport: { width, height: width < 768 ? 812 : 900 }, ...opts });
+    const page = await ctx.newPage();
+    await page.goto(base + ABOUT, { waitUntil: 'networkidle' });
+    return { page, ctx };
+  };
+
+  // 명함은 비스듬히 놓여 있어 외곽 상자 모서리는 카드 밖이다. 버튼이 없는 가운데 왼쪽을 누른다
+  const cardPoint = async (page) => {
+    const b = await page.locator('[data-card]').boundingBox();
+    return { x: b.width * 0.35, y: b.height * 0.45 };
+  };
+
+  // 헤더 소개 메뉴로 이동
+  {
+    const page = await openPage('/', 1280, 800);
+    await page.locator('header a[href="/about"]').click();
+    await page.waitForURL('**/about');
+    ok('헤더 소개 메뉴로 이동');
+    await page.close();
+  }
+
+  // 화면 폭별: 가로 넘침, 44px 조작 지점, 바로가기, 프로젝트 카드 제목 가림
+  for (const width of [375, 768, 1440]) {
+    const { page, ctx } = await ctxPage(width, { reducedMotion: 'reduce' });
+    const r = await page.evaluate(() => {
+      const vw = document.documentElement.clientWidth;
+      const small = [...document.querySelectorAll('[data-target]')]
+        .filter((el) => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height < 44)
+        .map((el) => el.textContent?.trim().slice(0, 12));
+      return { overflow: document.documentElement.scrollWidth - vw, small, github: !!document.querySelector('a[href*="github.com"]'), email: !!document.querySelector('[data-copy-email]'), projects: !!document.querySelector('a[href="/"]') };
+    });
+    if (r.overflow <= 0 && r.small.length === 0 && !r.github && r.email && r.projects)
+      ok(`${width}px 넘침 없음, 조작 지점 44px 이상, 프로젝트·이메일 바로 보임, GitHub 링크 없음`);
+    else fail(`about ${width}px ${JSON.stringify(r)}`);
+    await page.screenshot({ path: path.join(shotDir, `about-${width}.png`), fullPage: true });
+    await ctx.close();
+  }
+
+  // 기술 카드: hover 떠오름, 포인터 반응, 클릭 설명, Esc
+  {
+    const { page, ctx } = await ctxPage(1440);
+    const card = page.locator('[data-tech="react"]');
+    await card.hover();
+    await page.waitForTimeout(300);
+    const hoverTf = await card.evaluate((el) => el.style.transform);
+    const orbit = page.locator('[data-orbit]');
+    const box = await orbit.boundingBox();
+    await page.mouse.move(box.x + box.width * 0.95, box.y + box.height * 0.9);
+    await page.waitForTimeout(400);
+    const px = await orbit.evaluate((el) => el.style.getPropertyValue('--px'));
+    await page.locator('[data-tech="typescript"]').click();
+    const note = await page.locator('#orbit-note').innerText();
+    await page.keyboard.press('Escape');
+    const cleared = await page.locator('#orbit-note').innerText();
+    if (hoverTf.includes('translateY(-6px)') && Number(px) > 0.3 && note.includes('TypeScript로') && !cleared.includes('TypeScript로'))
+      ok(`기술 카드 hover 떠오름, 포인터 반응(--px ${px}), 클릭 설명, Esc 해제`);
+    else fail(`about 기술 카드 ${JSON.stringify({ hoverTf, px, note, cleared })}`);
+    await ctx.close();
+  }
+
+  // 명함: hover 로는 안 뒤집힘, 클릭 → 뒷면, 다시 클릭 → 앞면, 숨은 면 inert
+  {
+    const { page, ctx } = await ctxPage(1440);
+    await page.locator('#about-contact').scrollIntoViewIfNeeded();
+    const side = () => page.locator('[data-card]').getAttribute('data-side');
+    await page.locator('[data-card]').hover({ position: await cardPoint(page) });
+    await page.waitForTimeout(300);
+    const afterHover = await side();
+    await page.locator('[data-card]').click({ position: await cardPoint(page) });
+    const a = await side();
+    const frontInert = await page.locator('section[aria-label="명함 앞면"]').evaluate((el) => el.inert);
+    const tf = await page.locator('[data-card]').evaluate((el) => el.style.transform);
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: path.join(shotDir, 'about-card-back.png') });
+    await page.locator('[data-card]').click({ position: await cardPoint(page) });
+    const b = await side();
+    if (afterHover === 'front' && a === 'back' && frontInert && tf.includes('180deg') && b === 'front')
+      ok('명함: hover 로는 안 뒤집힘, 클릭→뒷면(Y축 180°), 다시 클릭→앞면, 숨은 면 inert');
+    else fail(`about 명함 ${JSON.stringify({ afterHover, a, frontInert, tf, b })}`);
+    await ctx.close();
+  }
+
+  // 키보드: 기술 카드 Enter, 명함 › 버튼 Enter
+  {
+    const { page, ctx } = await ctxPage(1440);
+    let tech = null;
+    for (let i = 0; i < 25 && !tech; i++) {
+      await page.keyboard.press('Tab');
+      tech = await page.evaluate(() => document.activeElement?.getAttribute('data-tech'));
+    }
+    await page.keyboard.press('Enter');
+    const pressed = tech && (await page.locator(`[data-tech="${tech}"]`).getAttribute('aria-pressed'));
+    let flipBtn = false;
+    for (let i = 0; i < 40 && !flipBtn; i++) {
+      await page.keyboard.press('Tab');
+      flipBtn = await page.evaluate(() => document.activeElement?.hasAttribute('data-flip-button') ?? false);
+    }
+    await page.keyboard.press('Enter');
+    const s = await page.locator('[data-card]').getAttribute('data-side');
+    if (tech && pressed === 'true' && flipBtn && s === 'back') ok(`키보드: "${tech}" 카드 Enter, 명함 › 버튼 Enter 로 뒤집기`);
+    else fail(`about 키보드 ${JSON.stringify({ tech, pressed, flipBtn, s })}`);
+    await ctx.close();
+  }
+
+  // 터치
+  {
+    const { page, ctx } = await ctxPage(375, { hasTouch: true, isMobile: true });
+    await page.locator('[data-tech="java"]').tap();
+    const note = await page.locator('#orbit-note').innerText();
+    await page.locator('#about-contact').scrollIntoViewIfNeeded();
+    await page.locator('[data-card]').tap({ position: await cardPoint(page) });
+    const s = await page.locator('[data-card]').getAttribute('data-side');
+    if (note.includes('Java로') && s === 'back') ok('375px 터치: 기술 설명 표시, 명함 탭으로 뒤집힘');
+    else fail(`about 터치 ${JSON.stringify({ note, s })}`);
+    await ctx.close();
+  }
+
+  // 움직임 줄이기
+  {
+    const { page, ctx } = await ctxPage(1440, { reducedMotion: 'reduce' });
+    await page.locator('[data-tech="react"]').hover();
+    const tf = await page.locator('[data-tech="react"]').evaluate((el) => el.style.transform);
+    await page.locator('[data-flip-button]').first().click();
+    const card = await page.locator('[data-card]').evaluate((el) => ({ tf: el.style.transform, side: el.getAttribute('data-side') }));
+    if (!tf.includes('translateY') && card.tf === 'none' && card.side === 'back')
+      ok('움직임 줄이기: 떠오름·기울기·회전 없이 바로 바뀜');
+    else fail(`about reduced motion ${JSON.stringify({ tf, card })}`);
+    await ctx.close();
+  }
+
+  // 인쇄: 인터랙티브 요소 숨김, 명함 뒷면 내용까지 평면으로 출력
+  {
+    const { page, ctx } = await ctxPage(1440);
+    await page.emulateMedia({ media: 'print' });
+    const r = await page.evaluate(() => ({
+      flat: (document.querySelector('[data-print-profile]')?.getBoundingClientRect().height ?? 0) > 0,
+      orbit: (document.querySelector('[data-orbit]')?.getBoundingClientRect().height ?? 0) > 0,
+      text: document.body.innerText,
+    }));
+    const must = ['aubepluieh3@naver.com', '현업 담당자와 직접', '2023.01', 'TypeScript'];
+    const missing = must.filter((m) => !r.text.includes(m));
+    if (r.flat && !r.orbit && missing.length === 0) ok('인쇄: 궤도·명함 숨김, 평면 소개(명함 뒷면 내용 포함) 출력');
+    else fail(`about 인쇄 ${JSON.stringify({ flat: r.flat, orbit: r.orbit, missing })}`);
+    await page.pdf({ path: path.join(shotDir, 'about-print.pdf'), format: 'A4' }).catch(() => {});
+    await ctx.close();
+  }
+}
+
 await browser.close();
 server.close();
 

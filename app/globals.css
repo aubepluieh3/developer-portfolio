@@ -49,6 +49,18 @@ details[open] > summary .chevron {
   transform: rotate(90deg);
 }
 
+/* 소개 페이지 기술 설명의 짧은 등장 효과 (motion-safe 에서만 적용) */
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
