@@ -329,6 +329,33 @@ console.log('\n[about]');
     await ctx.close();
   }
 
+  // 명함 버튼 마우스 클릭: 기운 카드 안 버튼이 hover 중 흔들리지 않고, 눌렀다 뗀 곳이 버튼이어야 뒤집힌다
+  {
+    const { page, ctx } = await ctxPage(1440);
+    await page.locator('#about-contact').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    const btn = page.locator('[data-flip-button]').first();
+    const b0 = await btn.boundingBox();
+    const cx = b0.x + b0.width / 2;
+    const cy = b0.y + b0.height / 2;
+    await page.mouse.move(cx - 60, cy - 40);
+    await page.mouse.move(cx, cy, { steps: 12 });
+    await page.waitForTimeout(500);
+    const targets = [];
+    await page.exposeFunction('__flipLog', (t) => targets.push(t));
+    await page.evaluate(() => {
+      for (const t of ['pointerdown', 'pointerup'])
+        document.addEventListener(t, (e) => window.__flipLog(`${t}:${e.target.closest('[data-flip-button]') ? 'btn' : 'other'}`), true);
+    });
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.waitForTimeout(900);
+    const side = await page.locator('[data-card]').getAttribute('data-side');
+    if (targets.join(',') === 'pointerdown:btn,pointerup:btn' && side === 'back') ok('명함 버튼 마우스 클릭: 누른 곳·뗀 곳 모두 버튼, 뒷면으로 뒤집힘');
+    else fail(`about 명함 버튼 클릭 ${JSON.stringify({ targets, side })}`);
+    await ctx.close();
+  }
+
   // 키보드: 기술 카드 Enter, 명함 › 버튼 Enter
   {
     const { page, ctx } = await ctxPage(1440);

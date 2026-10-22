@@ -51,6 +51,8 @@ export function NameCard({ profile }: { profile: Profile }) {
     'absolute inset-0 flex flex-col rounded-[22px] bg-white px-[7.5%] pt-[6.5%] pb-[6%] shadow-[0_44px_70px_-34px_rgba(30,64,120,0.38),0_2px_10px_rgba(30,64,120,0.06)] [backface-visibility:hidden]';
   const label = 'flex items-start justify-between font-mono text-[clamp(9px,2cqw,11px)] tracking-[0.18em] text-[#6b7686]';
   const fade = (visible: boolean) => (field.reduced ? `transition-opacity duration-200 ${visible ? 'opacity-100' : 'opacity-0'}` : '');
+  // 3D로 기운 카드 안에서 버튼에 transform(hover 확대 등)을 주면 그 순간 포인터 판정이 버튼을 벗어나
+  // hover가 깜빡이고 클릭이 카드로 넘어간다. 그래서 반응은 밝기·그림자로만 준다.
   const flipButton = (text: string) => (
     <button
       type="button"
@@ -58,7 +60,7 @@ export function NameCard({ profile }: { profile: Profile }) {
       aria-label={text}
       data-flip-button
       data-target
-      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#60a5fa,#2563eb)] text-white shadow-[0_10px_22px_-8px_rgba(37,99,235,0.6)] transition-transform duration-200 hover:scale-105 active:scale-95 sm:h-[52px] sm:w-[52px]"
+      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#60a5fa,#2563eb)] text-white shadow-[0_10px_22px_-8px_rgba(37,99,235,0.6)] transition-[filter,box-shadow] duration-200 hover:brightness-110 hover:shadow-[0_12px_26px_-8px_rgba(37,99,235,0.7)] active:brightness-95 sm:h-[52px] sm:w-[52px]"
     >
       <IconArrow back={back} />
     </button>
