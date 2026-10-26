@@ -125,7 +125,9 @@ export function NameCard({ profile }: { profile: Profile }) {
               <span>02 / 02</span>
             </div>
             <p className="mt-[5%] text-[clamp(12px,3.2cqw,15.5px)]/[1.7] text-[#1f2a40]">
-              {profile.workStyle[0]?.text} 프론트엔드에 관심이 많고, 관심 있던 기술을 실무에 적용해 보고 있습니다.
+              프론트엔드와 백엔드를 모두 경험하며 웹 서비스를 개발해 왔습니다.
+              <br />
+              변화하는 기술 속에서 즐거운 마음으로 새로움을 받아들이며 꾸준히 발전해 나가고 싶습니다.
             </p>
             <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#e6ebf2] pt-[4.5%]">
               <a
