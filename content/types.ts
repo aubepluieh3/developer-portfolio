@@ -144,6 +144,16 @@ export interface Architecture {
   flows: Flow[];
 }
 
+/** 상태 전환 그림. 좌표는 viewBox 720×300 기준 상태 상자 중심 */
+export interface StateDiagram {
+  caption: string;
+  states: { id: string; label: string; x: number; y: number; kind?: 'transient' | 'end' }[];
+  /** curve: 직선 대신 휘는 정도(+/- px). labelDx/Dy: 라벨 위치 보정 */
+  transitions: { from: string; to: string; label: string; curve?: number; labelDx?: number; labelDy?: number }[];
+  /** 그림에 선으로 그리지 않은 전환 설명 */
+  notes?: string[];
+}
+
 export interface CaseStudy extends Sourced {
   title: string;
   requirement: string;
@@ -155,6 +165,8 @@ export interface CaseStudy extends Sourced {
   table?: { caption?: string; columns: string[]; rows: string[][] };
   /** 구현 아래에 붙는 한 문장 정리 */
   conclusion?: string;
+  /** 구현 아래에 붙는 상태 전환 그림 (좁은 화면에서는 전환 목록) */
+  states?: StateDiagram;
   /** 항목 라벨 (기본 '요구사항' / '기존 구조' / '구현') */
   labels?: { requirement?: string; existing?: string; implementation?: string };
   more?: More;

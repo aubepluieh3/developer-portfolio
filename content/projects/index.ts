@@ -3,11 +3,12 @@ import type { Project } from '../types';
 // 풀스택 지원 기준 순서
 import { project as firstProject } from './op2-operation-system';
 import { project as secondProject } from './contract-billing';
-import { project as thirdProject } from './abuse-prevention';
-import { project as fourthProject } from './security-pledge';
-import { project as fifthProject } from './pg-payment-integration';
+import { project as thirdProject } from './scheduled-send';
+import { project as fourthProject } from './abuse-prevention';
+import { project as fifthProject } from './security-pledge';
+import { project as sixthProject } from './pg-payment-integration';
 
-const projects: Project[] = [firstProject, secondProject, thirdProject, fourthProject, fifthProject];
+const projects: Project[] = [firstProject, secondProject, thirdProject, fourthProject, fifthProject, sixthProject];
 
 const isProduction = process.env.NODE_ENV === 'production';
 

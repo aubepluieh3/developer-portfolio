@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArchitectureExplorer } from '@/components/architecture-diagram';
 import { Draft } from '@/components/draft';
+import { HashScroll } from '@/components/hash-scroll';
 import { More } from '@/components/more';
 import { Section } from '@/components/section';
+import { StateDiagram } from '@/components/state-diagram';
 import { Toc, type TocItem } from '@/components/toc';
 import { getProject, getProjectSlugs } from '@/content/projects';
 import type { Project, TextItem } from '@/content/types';
@@ -114,6 +116,7 @@ export default async function ProjectPage({ params }: Params) {
 
   return (
     <>
+      <HashScroll />
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Hero project={project} />
       </div>
@@ -355,6 +358,7 @@ export default async function ProjectPage({ params }: Params) {
                               </tbody>
                             </table>
                           )}
+                          {c.states && <StateDiagram diagram={c.states} />}
                           {c.conclusion && <p className="mt-5 text-ink">{c.conclusion}</p>}
                           {c.more && <More more={c.more} />}
                         </dd>

@@ -28,7 +28,8 @@ const projectsDir = path.join(root, 'content', 'projects');
 const projects = [];
 for (const file of readdirSync(projectsDir).filter((f) => f.endsWith('.ts') && f !== 'index.ts')) {
   const mod = await import(pathToFileURL(path.join(projectsDir, file)).href);
-  projects.push(mod.project);
+  // CHECK_SLUG=scheduled-send 처럼 주면 그 프로젝트만 검사한다
+  if (!process.env.CHECK_SLUG || process.env.CHECK_SLUG === mod.project.slug) projects.push(mod.project);
 }
 
 const server = http.createServer((req, res) => {
@@ -156,6 +157,30 @@ for (const project of projects) {
     await page.close();
   }
 
+  // 2-3) 주소에 #섹션 을 붙여 새로 열었을 때(새로고침·공유 링크) 제목이 고정 바 바로 아래에 오는지
+  //      실제 브라우저처럼 부드러운 스크롤을 켠 채, 섹션마다 새 탭으로 연다
+  for (const width of [1280, 375]) {
+    const bad = [];
+    for (const id of ['summary', 'background', 'architecture', 'development', 'problem-solving', 'validation']) {
+      const page = await browser.newPage({ viewport: { width, height: width < 768 ? 812 : 800 } });
+      await page.goto(`${base}${URL_}#${id}`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(2500);
+      const gap = await page.evaluate((sid) => {
+        const top = document.getElementById(`${sid}-title`).getBoundingClientRect().top;
+        // 화면에 보이는 고정 요소(헤더, 1023px 이하에서는 목차 바)의 아래 끝
+        const stickyBottom = Math.max(
+          ...[...document.querySelectorAll('[data-sticky]')].filter((el) => el.offsetParent !== null).map((el) => el.getBoundingClientRect().bottom),
+        );
+        return Math.round(top - stickyBottom);
+      }, id);
+      // 데스크톱은 헤더(56) 아래 24px, 모바일은 목차 바 아래 24px 근처여야 한다
+      if (gap < 0 || gap > 40) bad.push(`#${id} ${gap}px`);
+      await page.close();
+    }
+    if (bad.length === 0) ok(`${width}px 주소 #섹션 으로 진입 시 제목 위치 정상 (6개)`);
+    else fail(`${tag} ${width}px 주소 #섹션 진입 시 제목-고정 바 간격 이상: ${bad.join(', ')}`);
+  }
+
   // 3) 1280 첫 화면 핵심 정보, 4) 키보드로 노드 선택
   {
     const page = await openPage(URL_, 1280, 800);
@@ -218,6 +243,52 @@ for (const project of projects) {
       await page.evaluate(() => document.getElementById('architecture').scrollIntoView());
     }
     ok(`노드 링크 ${linked}개 이동 정상`);
+    await page.close();
+  }
+
+  // 6-1) 상태 전환 다이어그램 (있는 프로젝트만): 넓은 화면은 그림, 좁은 화면은 전환 목록. 상태·전환 수는 콘텐츠 기준
+  const diagrams = project.cases.filter((c) => c.states);
+  for (const c of diagrams) {
+    const d = c.states;
+    const ids = new Set(d.states.map((s) => s.id));
+    const dangling = d.transitions.filter((t) => !ids.has(t.from) || !ids.has(t.to)).map((t) => `${t.from}→${t.to}`);
+    if (dangling.length) fail(`${tag} 상태 전환이 없는 상태를 가리킴: ${dangling.join(', ')}`);
+    for (const width of [1280, 375]) {
+      const page = await openPage(URL_, width, width < 768 ? 812 : 800);
+      const r = await page.evaluate(() => {
+        const svg = document.querySelector('[data-state-diagram] svg');
+        const list = document.querySelector('[data-state-list]');
+        const visible = (el) => !!el && el.getBoundingClientRect().height > 0 && getComputedStyle(el).display !== 'none';
+        return {
+          svg: visible(svg),
+          list: visible(list),
+          states: document.querySelectorAll('[data-state-diagram] [data-state]').length,
+          lines: document.querySelectorAll('[data-state-diagram] [data-transition]').length,
+          items: document.querySelectorAll('[data-state-list] li').length,
+        };
+      });
+      const want = width >= 640 ? r.svg && !r.list : r.list && !r.svg;
+      if (want && r.states === d.states.length && r.lines === d.transitions.length && r.items === d.transitions.length)
+        ok(`${width}px 상태 전환 ${width >= 640 ? '그림' : '목록'} 표시, 상태 ${r.states}개·전환 ${r.lines}개`);
+      else fail(`${tag} ${width}px 상태 전환 ${JSON.stringify({ ...r, wantStates: d.states.length, wantLines: d.transitions.length })}`);
+      await page.close();
+    }
+  }
+
+  // 6-2) 인쇄: 넘침 없이 PDF로 나오고, 상태 전환 그림이 있으면 인쇄에도 보이는지
+  {
+    const page = await openPage(URL_, 1280);
+    await page.emulateMedia({ media: 'print' });
+    const r = await page.evaluate(() => {
+      const svg = document.querySelector('[data-state-diagram] svg');
+      return {
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        diagram: svg ? svg.getBoundingClientRect().height > 0 : null,
+      };
+    });
+    const pdf = await page.pdf({ path: path.join(shotDir, `${tag}-print.pdf`), format: 'A4', printBackground: true }).then(() => true, () => false);
+    if (r.overflow <= 0 && pdf && r.diagram !== false) ok(`인쇄: 넘침 없음, PDF 생성${r.diagram ? ', 상태 전환 그림 포함' : ''}`);
+    else fail(`${tag} 인쇄 ${JSON.stringify({ ...r, pdf })}`);
     await page.close();
   }
 }
