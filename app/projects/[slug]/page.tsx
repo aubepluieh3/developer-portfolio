@@ -113,6 +113,9 @@ export default async function ProjectPage({ params }: Params) {
   if (!project) notFound();
   const { overview, background, architecture, contributions, cases, validation } = project;
   const compare = background.labels ?? { before: '기존', after: '개선' };
+  // 회고는 본인 문구가 들어오기 전까지 섹션·목차 모두 숨긴다
+  const hasRetro = project.retrospective.length > 0;
+  const toc = hasRetro ? TOC : TOC.filter((item) => item.id !== 'retrospective');
 
   return (
     <>
@@ -122,13 +125,13 @@ export default async function ProjectPage({ params }: Params) {
       </div>
 
       <div data-sticky className="sticky top-14 z-20 lg:hidden">
-        <Toc items={TOC} variant="bar" />
+        <Toc items={toc} variant="bar" />
       </div>
 
       <div className="mx-auto max-w-[1280px] px-5 md:px-8 lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
         <aside className="hidden lg:block">
           <div className="sticky top-20 pt-14">
-            <Toc items={TOC} variant="side" />
+            <Toc items={toc} variant="side" />
           </div>
         </aside>
 
@@ -389,15 +392,17 @@ export default async function ProjectPage({ params }: Params) {
           </Section>
 
           {/* 07 */}
-          <Section id="retrospective" num="07" title="회고">
-            <div className={`${prose} space-y-4`}>
-              {project.retrospective.map((r) => (
-                <Draft key={r.text} evidence={r.evidence}>
-                  <p>{r.text}</p>
-                </Draft>
-              ))}
-            </div>
-          </Section>
+          {hasRetro && (
+            <Section id="retrospective" num="07" title="회고">
+              <div className={`${prose} space-y-4`}>
+                {project.retrospective.map((r) => (
+                  <Draft key={r.text} evidence={r.evidence}>
+                    <p>{r.text}</p>
+                  </Draft>
+                ))}
+              </div>
+            </Section>
+          )}
 
           {/* 마지막 섹션도 목차에서 위로 올라올 수 있도록 남기는 여백 */}
           <div aria-hidden className="pb-[30vh]" />

@@ -90,6 +90,26 @@ for (const project of projects) {
   const tag = project.slug;
   console.log(`\n[${tag}]`);
 
+  // 07 회고는 내용이 있을 때만 보인다. 없으면 06 검증 및 결과가 마지막 섹션이다
+  const hasRetro = project.retrospective.length > 0;
+  const lastId = hasRetro ? 'retrospective' : 'validation';
+  const lastLabel = hasRetro ? '회고' : '검증 및 결과';
+
+  // 0) 07 회고 섹션·목차 항목이 내용 유무와 맞는지
+  {
+    const page = await openPage(URL_, 1280);
+    const found = await page.evaluate(() => ({
+      section: document.querySelectorAll('#retrospective').length,
+      links: document.querySelectorAll('nav[data-toc] a[href="#retrospective"]').length,
+      tocs: document.querySelectorAll('nav[data-toc]').length,
+    }));
+    const want = hasRetro ? { section: 1, links: found.tocs } : { section: 0, links: 0 };
+    if (found.section === want.section && found.links === want.links)
+      ok(`07 회고 ${hasRetro ? '표시' : '숨김'} (섹션 ${found.section}, 목차 링크 ${found.links})`);
+    else fail(`${tag} 07 회고 ${hasRetro ? '표시' : '숨김'} 기대, 실제 섹션 ${found.section}·목차 링크 ${found.links}`);
+    await page.close();
+  }
+
   // 1) 가로 넘침 + 스크린샷, 펼쳐 보기 전체 열림 상태
   for (const width of [375, 768, 1024, 1263, 1280]) {
     const page = await openPage(URL_, width, width < 768 ? 812 : 800);
@@ -110,7 +130,8 @@ for (const project of projects) {
     const page = await openPage(URL_, width, width < 768 ? 812 : 800);
     const nav = width >= 1024 ? 'nav[data-toc="side"]' : 'nav[data-toc="bar"]';
     const links = await page.locator(`${nav} a`).all();
-    if (links.length !== 7) fail(`${tag} ${width}px 목차 항목 수 ${links.length} (7이어야 함)`);
+    const tocCount = hasRetro ? 7 : 6;
+    if (links.length !== tocCount) fail(`${tag} ${width}px 목차 항목 수 ${links.length} (${tocCount}이어야 함)`);
     let passed = 0;
     for (const link of links) {
       const id = (await link.getAttribute('href')).slice(1);
@@ -129,20 +150,20 @@ for (const project of projects) {
     await page.close();
   }
 
-  // 2-1) 실제 브라우저처럼 부드러운 스크롤을 켠 상태에서 마지막 항목(회고) 클릭
+  // 2-1) 실제 브라우저처럼 부드러운 스크롤을 켠 상태에서 마지막 항목 클릭
   for (const width of [1280, 375]) {
     const page = await browser.newPage({ viewport: { width, height: width < 768 ? 812 : 800 } });
     await page.goto(base + URL_, { waitUntil: 'networkidle' });
     const nav = width >= 1024 ? 'nav[data-toc="side"]' : 'nav[data-toc="bar"]';
-    await page.locator(`${nav} a[href="#retrospective"]`).click();
+    await page.locator(`${nav} a[href="#${lastId}"]`).click();
     await page.waitForTimeout(3000);
     const current = await page.locator(`${nav} a[aria-current="true"]`).getAttribute('href');
-    if (current === '#retrospective') ok(`${width}px 부드러운 스크롤로 회고 클릭 시 회고가 현재 항목`);
-    else fail(`${tag} ${width}px 부드러운 스크롤로 회고 클릭 후 현재 항목 ${current} (#retrospective 여야 함)`);
+    if (current === `#${lastId}`) ok(`${width}px 부드러운 스크롤로 ${lastLabel} 클릭 시 현재 항목이 ${lastLabel}`);
+    else fail(`${tag} ${width}px 부드러운 스크롤로 ${lastLabel} 클릭 후 현재 항목 ${current} (#${lastId} 여야 함)`);
     await page.close();
   }
 
-  // 2-2) 휠 없이(스크롤바 드래그처럼) 페이지 맨 아래까지 스크롤하면 마지막 섹션(회고)이 현재 항목이 되는지
+  // 2-2) 휠 없이(스크롤바 드래그처럼) 페이지 맨 아래까지 스크롤하면 마지막 섹션이 현재 항목이 되는지
   for (const width of [1280, 375]) {
     const page = await openPage(URL_, width, width < 768 ? 812 : 800);
     const nav = width >= 1024 ? 'nav[data-toc="side"]' : 'nav[data-toc="bar"]';
@@ -152,8 +173,8 @@ for (const project of projects) {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(800);
     const current = await page.locator(`${nav} a[aria-current="true"]`).getAttribute('href');
-    if (current === '#retrospective') ok(`${width}px 맨 아래 스크롤 시 회고가 현재 항목`);
-    else fail(`${tag} ${width}px 맨 아래 스크롤 시 현재 항목 ${current} (#retrospective 여야 함)`);
+    if (current === `#${lastId}`) ok(`${width}px 맨 아래 스크롤 시 현재 항목이 ${lastLabel}`);
+    else fail(`${tag} ${width}px 맨 아래 스크롤 시 현재 항목 ${current} (#${lastId} 여야 함)`);
     await page.close();
   }
 
